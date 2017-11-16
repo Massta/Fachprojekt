@@ -33,11 +33,7 @@ double derivative(double x)
 	return x * (1 - x);
 }
 
-int main() {
-
-	printf("Ich bin gaaaaanz am Anfang");
-
-
+int main() {	
 	srand((long)time(NULL));
 	//fillData();
 	//randomize weight
@@ -52,9 +48,10 @@ int main() {
 		}
 	}
 
-	printf("Ich bin gerade vor dem Aufruf von read_CSV");
-	read_CSV("mnist_train_small.csv");
-	printf("Ich bin gerade hinter dem Aufruf von read_CSV");
+	train("mnist_train_small.csv");
+	test("mnist_test_small.csv");
+	
+	getchar();
 }
 
 double randfrom(double min, double max)
@@ -65,18 +62,19 @@ double randfrom(double min, double max)
 }
 
 
-void read_CSV(const char *  filename)
+void train(const char *  filename)
 {
 	char buffer[2048];
 	char *record, *line;
-
+	
 	printf("Ich bin gerade vor der ersten Schleife");
-
-	int iteration = 0, zeileNummer = 0;
-	while (iteration < 10)
+	
+	int iteration = 0, zeileNummer = 0, error = 1;
+	double quotient = 1.0;
+	while(quotient > 0.05)
 	{
 		printf("Iteration %i\n", iteration);
-
+		
 		FILE *fstream = fopen(filename, "r");
 		if (fstream == NULL)
 		{
@@ -85,7 +83,8 @@ void read_CSV(const char *  filename)
 		else
 		{
 			//Datei wurde geoeffnet
-
+			
+			error = 0;
 			zeileNummer = 0;
 			//Gehe durch alle Zeilen durch
 			while ((line = fgets(buffer, sizeof(buffer), fstream)) != NULL)
@@ -97,11 +96,11 @@ void read_CSV(const char *  filename)
 					data[j] = atoi(record);
 					record = strtok(NULL, ",");
 				}
-
+				
 				//Zeile wurde eingelesen
-
+				
 				//Zeile verarbeiten
-
+				
 				int label = data[0];
 
 				//<Forwardprop>
@@ -140,8 +139,15 @@ void read_CSV(const char *  filename)
 					}
 				}
 
-				printf("Zeile Nummer: %i, Gesuchte Zahl: %i, Geratene Zahl: %i\n", zeileNummer, label, biggestIndex);
+				if(label != biggestIndex)
+				{
+					error++;
+				}
+				
+				printf("Iteration: %i, Zeile: %i, Gesuchte Zahl: %i, Geratene Zahl: %i, Fehler: %i\n", iteration, zeileNummer, label, biggestIndex, error);
 
+				
+				
 				//<Backprop>
 
 				//Output layer anpassen
@@ -180,17 +186,117 @@ void read_CSV(const char *  filename)
 				}
 
 				//</Backprop>
+				
+				zeileNummer++;
+			}
+			quotient = (double)error/zeileNummer;
+			printf("Iteration: %i, Fehlerquotient: %f\n\n", iteration, quotient);
+			
+			//Datei schließen
+			fclose(fstream);
+		}
+		
+		
+		
+		iteration++;
+	}
+	
+	
+}
+
+void test(const char *  filename)
+{
+	char buffer[2048];
+	char *record, *line;
+	
+	int iteration = 0, zeileNummer = 0, error = 1;
+	while(iteration < 1 && error > 0)
+	{
+		printf("Iteration %i\n", iteration);
+		
+		FILE *fstream = fopen(filename, "r");
+		if (fstream == NULL)
+		{
+			printf("\n file opening failed ");
+		}
+		else
+		{
+			//Datei wurde geoeffnet
+			
+			error = 0;
+			zeileNummer = 0;
+			//Gehe durch alle Zeilen durch
+			while ((line = fgets(buffer, sizeof(buffer), fstream)) != NULL)
+			{
+				//Lies Zeile ein
+				record = strtok(line, ",");
+				for (int j = 0; j < 785; j++)
+				{
+					data[j] = atoi(record);
+					record = strtok(NULL, ",");
+				}
+				
+				//Zeile wurde eingelesen
+				
+				//Zeile verarbeiten
+				
+				int label = data[0];
+
+				//<Forwardprop>
+				//Berechne outputs des hidden layers
+				for (int i = 0; i < 300; i++) {
+					double outputSum = 0;
+					for (int j = 1; j < 785; j++)
+					{
+						outputSum += hiddenWeights[i][j - 1] * data[j];
+					}
+					outputSum /= 255;
+					outputSum += hiddenBias[i];
+					hiddenOutputs[i] = sigmoid(outputSum);
+				}
+
+				//Berechne outputs des output layers
+				for (int i = 0; i < 10; i++) {
+					double outputSum = 0;
+					for (int j = 0; j < 300; j++)
+					{
+						outputSum += outputWeights[i][j] * hiddenOutputs[j];
+					}
+					outputSum;
+					outputSum += outputBias[i];
+					outputOutputs[i] = sigmoid(outputSum);
+				}
+				//</Forwardprop>
+
+				//Finde gr??ten Wert
+				int biggestIndex = -1;
+				double biggestOutput = -1;
+				for (int i = 0; i < 10; i++) {
+					if (outputOutputs[i] > biggestOutput) {
+						biggestIndex = i;
+						biggestOutput = outputOutputs[i];
+					}
+				}
+
+				if(label != biggestIndex)
+				{
+					error++;
+				}
+				
+				printf("Iteration: %i, Zeile: %i, Gesuchte Zahl: %i, Geratene Zahl: %i, Fehler: %i\n", iteration, zeileNummer, label, biggestIndex, error);
 
 				zeileNummer++;
 			}
-
-			//Datei schlie�en
+			
+			printf("Fehlerquote: (%i/%i)\n\n", error, zeileNummer);
+			
+			//Datei schließen
 			fclose(fstream);
 		}
-
-
+		
+		
 		iteration++;
 	}
-
-
+	
+	
 }
