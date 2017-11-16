@@ -283,12 +283,13 @@ void test(const char *  filename)
 					error++;
 				}
 				
-				printf("Iteration: %i, Zeile: %i, Gesuchte Zahl: %i, Geratene Zahl: %i, Fehler: %i\n", iteration, zeileNummer, label, biggestIndex, error);
+				printf("Test: Zeile: %i, Gesuchte Zahl: %i, Geratene Zahl: %i, Fehler: %i\n", iteration, zeileNummer, label, biggestIndex, error);
 
 				zeileNummer++;
 			}
 			
-			printf("Fehlerquote: (%i/%i)\n\n", error, zeileNummer);
+			double fehlerquotient = (double) error/zeileNummer;
+			printf("Fehlerquote: (%i/%i) = %f\n\n", error, zeileNummer, fehlerquotient);
 			
 			//Datei schließen
 			fclose(fstream);
