@@ -34,7 +34,10 @@ double derivative(double x)
 }
 
 int main() {
-	read_CSV("mnist_train_medium.csv");
+
+	printf("Ich bin gaaaaanz am Anfang");
+
+
 	srand((long)time(NULL));
 	//fillData();
 	//randomize weight
@@ -49,95 +52,9 @@ int main() {
 		}
 	}
 
-	//TODO: Bias setzen
-
-	int epoch = 0;
-	int epochCount = 2000;
-
-	while (epoch < epochCount) {
-		printf("Epoche %i\n", epoch);
-		epoch++;
-		for (int numberIndex = 0; numberIndex < amountData; numberIndex++) {
-			int label = data[numberIndex][0];
-
-			//<Forwardprop>
-			//Berechne outputs des hidden layers
-			for (int i = 0; i < 300; i++) {
-				double outputSum = 0;
-				for (int j = 1; j < 785; j++)
-				{
-					outputSum += hiddenWeights[i][j - 1] * data[numberIndex][j];
-				}
-				outputSum /= 255;
-				outputSum += hiddenBias[i];
-				hiddenOutputs[i] = sigmoid(outputSum);
-			}
-
-			//Berechne outputs des output layers
-			for (int i = 0; i < 10; i++) {
-				double outputSum = 0;
-				for (int j = 0; j < 300; j++)
-				{
-					outputSum += outputWeights[i][j] * hiddenOutputs[j];
-				}
-				outputSum;
-				outputSum += outputBias[i];
-				outputOutputs[i] = sigmoid(outputSum);
-			}
-			//</Forwardprop>
-
-			//Finde größten Wert
-			int biggestIndex = -1;
-			double biggestOutput = -1;
-			for (int i = 0; i < 10; i++) {
-				if (outputOutputs[i] > biggestOutput) {
-					biggestIndex = i;
-					biggestOutput = outputOutputs[i];
-				}
-			}
-
-			printf("(%i/%i) Gesuchte Zahl: %i, Geratene Zahl: %i\n", numberIndex, amountData, label, biggestIndex);
-
-			//<Backprop>
-
-			//Output layer anpassen
-			for (int i = 0; i < 10; i++)
-			{
-				int y = 0;
-				if (label == i) {
-					y = 1;
-				}
-				int x = 0;
-				if (outputOutputs[i] > 0.5) {
-					x = 1;
-				}
-				//Error berechnen
-				outputError[i] = derivative(outputOutputs[i]) * (y - x);
-				//Adjust weights
-				for (int j = 0; j < 300; j++) {
-					outputWeights[i][j] += LEARN_RATE * outputError[i] * hiddenOutputs[j];
-				}
-			}
-
-			//Hidden layer anpassen
-			for (int i = 0; i < 300; i++)
-			{
-				//Error berechnen
-				double outputErrorSum = 0;
-				for (int j = 0; j < 10; j++) {
-					outputErrorSum += outputError[j] * outputWeights[j][i];
-				}
-				hiddenError[i] = derivative(hiddenOutputs[i]) * outputErrorSum;
-
-				//Adjust weights
-				for (int j = 1; j < 785; j++) {
-					hiddenWeights[i][j - 1] += LEARN_RATE * hiddenError[i] * data[numberIndex][j];
-				}
-			}
-
-			//</Backprop>
-		}
-	}
+	printf("Ich bin gerade vor dem Aufruf von read_CSV");
+	read_CSV("mnist_train_small.csv");
+	printf("Ich bin gerade hinter dem Aufruf von read_CSV");
 }
 
 double randfrom(double min, double max)
@@ -152,25 +69,128 @@ void read_CSV(const char *  filename)
 {
 	char buffer[2048];
 	char *record, *line;
-	int i = 0, j = 0;
-	FILE *fstream = fopen(filename, "r");
-	if (fstream == NULL)
+
+	printf("Ich bin gerade vor der ersten Schleife");
+
+	int iteration = 0, zeileNummer = 0;
+	while (iteration < 10)
 	{
-		printf("\n file opening failed ");
-		return -1;
-	}
-	while ((line = fgets(buffer, sizeof(buffer), fstream)) != NULL)
-	{
-		//printf("Zeile %i:\n", i);
-		record = strtok(line, ",");
-		while (j < 785)
+		printf("Iteration %i\n", iteration);
+
+		FILE *fstream = fopen(filename, "r");
+		if (fstream == NULL)
 		{
-			//printf("%s, ", record);    //here you can put the record into the array as per your requirement.
-			data[i][j++] = atoi(record);
-			record = strtok(NULL, ",");
+			printf("\n file opening failed ");
 		}
-		//printf("\n");
-		j = 0;
-		++i;
+		else
+		{
+			//Datei wurde geoeffnet
+
+			zeileNummer = 0;
+			//Gehe durch alle Zeilen durch
+			while ((line = fgets(buffer, sizeof(buffer), fstream)) != NULL)
+			{
+				//Lies Zeile ein
+				record = strtok(line, ",");
+				for (int j = 0; j < 785; j++)
+				{
+					data[j] = atoi(record);
+					record = strtok(NULL, ",");
+				}
+
+				//Zeile wurde eingelesen
+
+				//Zeile verarbeiten
+
+				int label = data[0];
+
+				//<Forwardprop>
+				//Berechne outputs des hidden layers
+				for (int i = 0; i < 300; i++) {
+					double outputSum = 0;
+					for (int j = 1; j < 785; j++)
+					{
+						outputSum += hiddenWeights[i][j - 1] * data[j];
+					}
+					outputSum /= 255;
+					outputSum += hiddenBias[i];
+					hiddenOutputs[i] = sigmoid(outputSum);
+				}
+
+				//Berechne outputs des output layers
+				for (int i = 0; i < 10; i++) {
+					double outputSum = 0;
+					for (int j = 0; j < 300; j++)
+					{
+						outputSum += outputWeights[i][j] * hiddenOutputs[j];
+					}
+					outputSum;
+					outputSum += outputBias[i];
+					outputOutputs[i] = sigmoid(outputSum);
+				}
+				//</Forwardprop>
+
+				//Finde gr??ten Wert
+				int biggestIndex = -1;
+				double biggestOutput = -1;
+				for (int i = 0; i < 10; i++) {
+					if (outputOutputs[i] > biggestOutput) {
+						biggestIndex = i;
+						biggestOutput = outputOutputs[i];
+					}
+				}
+
+				printf("Zeile Nummer: %i, Gesuchte Zahl: %i, Geratene Zahl: %i\n", zeileNummer, label, biggestIndex);
+
+				//<Backprop>
+
+				//Output layer anpassen
+				for (int i = 0; i < 10; i++)
+				{
+					int y = 0;
+					if (label == i) {
+						y = 1;
+					}
+					int x = 0;
+					if (outputOutputs[i] > 0.5) {
+						x = 1;
+					}
+					//Error berechnen
+					outputError[i] = derivative(outputOutputs[i]) * (y - x);
+					//Adjust weights
+					for (int j = 0; j < 300; j++) {
+						outputWeights[i][j] += LEARN_RATE * outputError[i] * hiddenOutputs[j];
+					}
+				}
+
+				//Hidden layer anpassen
+				for (int i = 0; i < 300; i++)
+				{
+					//Error berechnen
+					double outputErrorSum = 0;
+					for (int j = 0; j < 10; j++) {
+						outputErrorSum += outputError[j] * outputWeights[j][i];
+					}
+					hiddenError[i] = derivative(hiddenOutputs[i]) * outputErrorSum;
+
+					//Adjust weights
+					for (int j = 1; j < 785; j++) {
+						hiddenWeights[i][j - 1] += LEARN_RATE * hiddenError[i] * data[j];
+					}
+				}
+
+				//</Backprop>
+
+				zeileNummer++;
+			}
+
+			//Datei schließen
+			fclose(fstream);
+		}
+
+
+		iteration++;
 	}
+
+
 }
