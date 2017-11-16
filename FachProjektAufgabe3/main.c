@@ -19,7 +19,7 @@ double outputBias[10];
 double outputOutputs[10];
 double outputError[10];
 
-double LEARN_RATE = 0.01;
+double LEARN_RATE = 0.005;
 
 double sigmoid(double x)
 {
@@ -48,9 +48,10 @@ int main() {
 		}
 	}
 
-	train("mnist_train_small.csv");
-	test("mnist_test_small.csv");
-	
+	train("mnist_train.csv");
+	printf("Ended training. Continue with testing");
+	getchar();
+	test("mnist_test.csv");
 	getchar();
 }
 
@@ -142,54 +143,54 @@ void train(const char *  filename)
 				if(label != biggestIndex)
 				{
 					error++;
+					
+					//<Backprop>
+
+					//Output layer anpassen
+					for (int i = 0; i < 10; i++)
+					{
+						int y = 0;
+						if (label == i) {
+							y = 1;
+						}
+						int x = 0;
+						if (outputOutputs[i] > 0.5) {
+							x = 1;
+						}
+						//Error berechnen
+						outputError[i] = derivative(outputOutputs[i]) * (y - x);
+						//Adjust weights
+						for (int j = 0; j < 300; j++) {
+							outputWeights[i][j] += LEARN_RATE * outputError[i] * hiddenOutputs[j];
+						}
+					}
+
+					//Hidden layer anpassen
+					for (int i = 0; i < 300; i++)
+					{
+						//Error berechnen
+						double outputErrorSum = 0;
+						for (int j = 0; j < 10; j++) {
+							outputErrorSum += outputError[j] * outputWeights[j][i];
+						}
+						hiddenError[i] = derivative(hiddenOutputs[i]) * outputErrorSum;
+
+						//Adjust weights
+						for (int j = 1; j < 785; j++) {
+							hiddenWeights[i][j - 1] += LEARN_RATE * hiddenError[i] * data[j];
+						}
+					}
+
+					//</Backprop>
 				}
-				
-				printf("Iteration: %i, Zeile: %i, Gesuchte Zahl: %i, Geratene Zahl: %i, Fehler: %i\n", iteration, zeileNummer, label, biggestIndex, error);
-
-				
-				
-				//<Backprop>
-
-				//Output layer anpassen
-				for (int i = 0; i < 10; i++)
+				quotient = (double)error/zeileNummer;
+				if(zeileNummer % 100 == 0)
 				{
-					int y = 0;
-					if (label == i) {
-						y = 1;
-					}
-					int x = 0;
-					if (outputOutputs[i] > 0.5) {
-						x = 1;
-					}
-					//Error berechnen
-					outputError[i] = derivative(outputOutputs[i]) * (y - x);
-					//Adjust weights
-					for (int j = 0; j < 300; j++) {
-						outputWeights[i][j] += LEARN_RATE * outputError[i] * hiddenOutputs[j];
-					}
+					printf("Iteration: %i, Zeile: %i, Gesucht: %i, Geraten: %i, Fehlerquotient: %f\n", iteration, zeileNummer, label, biggestIndex, quotient);
 				}
-
-				//Hidden layer anpassen
-				for (int i = 0; i < 300; i++)
-				{
-					//Error berechnen
-					double outputErrorSum = 0;
-					for (int j = 0; j < 10; j++) {
-						outputErrorSum += outputError[j] * outputWeights[j][i];
-					}
-					hiddenError[i] = derivative(hiddenOutputs[i]) * outputErrorSum;
-
-					//Adjust weights
-					for (int j = 1; j < 785; j++) {
-						hiddenWeights[i][j - 1] += LEARN_RATE * hiddenError[i] * data[j];
-					}
-				}
-
-				//</Backprop>
 				
 				zeileNummer++;
 			}
-			quotient = (double)error/zeileNummer;
 			printf("Iteration: %i, Fehlerquotient: %f\n\n", iteration, quotient);
 			
 			//Datei schließen
@@ -210,6 +211,7 @@ void test(const char *  filename)
 	char *record, *line;
 	
 	int iteration = 0, zeileNummer = 0, error = 1;
+	double quotient = 1.0;
 	while(iteration < 1 && error > 0)
 	{
 		printf("Iteration %i\n", iteration);
@@ -283,13 +285,16 @@ void test(const char *  filename)
 					error++;
 				}
 				
-				printf("Test: Zeile: %i, Gesuchte Zahl: %i, Geratene Zahl: %i, Fehler: %i\n", iteration, zeileNummer, label, biggestIndex, error);
-
+				quotient = (double)error/zeileNummer;
+				if(zeileNummer % 100 == 0)
+				{
+					printf("Test: Zeile: %i, Gesucht: %i, Geraten: %i, Fehlerquotient: %f\n", zeileNummer, label, biggestIndex, quotient);
+				}
+				
 				zeileNummer++;
 			}
 			
-			double fehlerquotient = (double) error/zeileNummer;
-			printf("Fehlerquote: (%i/%i) = %f\n\n", error, zeileNummer, fehlerquotient);
+			printf("Fehlerquote: (%i/%i) = %f\n\n", error, zeileNummer, quotient);
 			
 			//Datei schließen
 			fclose(fstream);
