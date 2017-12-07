@@ -21,6 +21,26 @@ namespace ImagePreprocessing
         const string PATH_GRAY_TRAIN = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Grayscale Train";
         static void Main(string[] args)
         {
+            var lines = File.ReadAllLines(Path.Combine(PATH_GRAY_TRAIN, "Train_num.csv"));
+            var cats = lines.Take(2500).ToArray();
+            var dogs = lines.Skip(12500).Take(2500).ToArray();
+            StringBuilder newCsv = new StringBuilder();
+            int catC = 0;
+            int dogC = 0;
+            for (int j = 0; j < 5000; j++)
+            {
+                if (j % 2 == 0)
+                {
+                    newCsv.AppendLine(cats[catC]);
+                    catC++;
+                }
+                else
+                {
+                    newCsv.AppendLine(dogs[dogC]);
+                    dogC++;
+                }
+            }
+            File.WriteAllText(Path.Combine(PATH_GRAY_TRAIN, "Train_num_ordered_small.csv"), newCsv.ToString());
             Console.WriteLine("Reading files...");
             var files = Directory.GetFiles(PATH_TRAIN);
             Console.WriteLine("Loading images...");

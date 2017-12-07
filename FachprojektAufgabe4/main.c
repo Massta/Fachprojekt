@@ -19,11 +19,11 @@ double outputBias[2];
 double outputOutputs[2];
 double outputError[2];
 
-double LEARN_RATE = 0.005;
+double LEARN_RATE = 0.1;
 
 double sigmoid(double x)
 {
-	double exp_val = exp(-7 * x);
+	double exp_val = exp(-1 * x);
 
 	return 1.0 / (1.0 + exp_val);
 }
@@ -39,16 +39,16 @@ int main() {
 	//randomize weight
 	for (int i = 0; i < 300; i++) {
 		for (int j = 0; j < dataDimension; j++) {
-			hiddenWeights[i][j] = randfrom(-0.05, 0.05);
+			hiddenWeights[i][j] = randfrom(-1, 1);
 		}
 	}
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 300; j++) {
-			outputWeights[i][j] = randfrom(-0.05, 0.05);
+			outputWeights[i][j] = randfrom(-1, 1);
 		}
 	}
 
-	train("C:\\Users\\Julius Jacobsohn\\Documents\\Kaggle\\Grayscale Train\\Train.csv");
+	train("C:\\Users\\Julius Jacobsohn\\Documents\\Kaggle\\Grayscale Train\\Train_num_ordered_small.csv");
 	printf("Ended training. Continue with testing");
 	getchar();
 	//test("mnist_test.csv");
@@ -65,7 +65,7 @@ double randfrom(double min, double max)
 
 void train(const char *  filename)
 {
-	char buffer[2048];
+	char buffer[16768];
 	char *record, *line;
 
 	printf("Ich bin gerade vor der ersten Schleife");
@@ -111,9 +111,9 @@ void train(const char *  filename)
 					double outputSum = 0;
 					for (int j = 0; j < dataDimension; j++)
 					{
-						outputSum += hiddenWeights[i][j] * data[j];
+						outputSum += hiddenWeights[i][j] * (data[j]/255);
 					}
-					outputSum /= 255;
+					//outputSum /= 255;
 					outputSum += hiddenBias[i];
 					hiddenOutputs[i] = sigmoid(outputSum);
 				}
@@ -251,9 +251,9 @@ void test(const char *  filename)
 					double outputSum = 0;
 					for (int j = 1; j < dataDimension; j++)
 					{
-						outputSum += hiddenWeights[i][j] * data[j];
+						outputSum += hiddenWeights[i][j] * (data[j]/255);
 					}
-					outputSum /= 255;
+					//outputSum /= 255;
 					outputSum += hiddenBias[i];
 					hiddenOutputs[i] = sigmoid(outputSum);
 				}
