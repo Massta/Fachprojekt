@@ -9,15 +9,15 @@
 
 #define ARRAYSIZE(x)  (sizeof(x)/sizeof(*(x)))
 
-double hiddenWeights[300][784];
+double hiddenWeights[300][64*64];
 double hiddenBias[300];
 double hiddenOutputs[300];
 double hiddenError[300];
 
-double outputWeights[10][300];
-double outputBias[10];
-double outputOutputs[10];
-double outputError[10];
+double outputWeights[2][300];
+double outputBias[2];
+double outputOutputs[2];
+double outputError[2];
 
 double LEARN_RATE = 0.005;
 
@@ -33,25 +33,25 @@ double derivative(double x)
 	return x * (1 - x);
 }
 
-int main() {	
+int main() {
 	srand((long)time(NULL));
 	//fillData();
 	//randomize weight
 	for (int i = 0; i < 300; i++) {
-		for (int j = 0; j < 784; j++) {
+		for (int j = 0; j < dataDimension; j++) {
 			hiddenWeights[i][j] = randfrom(-0.05, 0.05);
 		}
 	}
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 300; j++) {
 			outputWeights[i][j] = randfrom(-0.05, 0.05);
 		}
 	}
 
-	train("mnist_train.csv");
+	train("C:\\Users\\Julius Jacobsohn\\Documents\\Kaggle\\Grayscale Train\\Train.csv");
 	printf("Ended training. Continue with testing");
 	getchar();
-	test("mnist_test.csv");
+	//test("mnist_test.csv");
 	getchar();
 }
 
@@ -67,15 +67,15 @@ void train(const char *  filename)
 {
 	char buffer[2048];
 	char *record, *line;
-	
+
 	printf("Ich bin gerade vor der ersten Schleife");
-	
+
 	int iteration = 0, zeileNummer = 0, error = 1;
 	double quotient = 1.0;
-	while(quotient > 0.05)
+	while (quotient > 0.05)
 	{
 		printf("Iteration %i\n", iteration);
-		
+
 		FILE *fstream = fopen(filename, "r");
 		if (fstream == NULL)
 		{
@@ -84,32 +84,34 @@ void train(const char *  filename)
 		else
 		{
 			//Datei wurde geoeffnet
-			
+
 			error = 0;
 			zeileNummer = 0;
 			//Gehe durch alle Zeilen durch
 			while ((line = fgets(buffer, sizeof(buffer), fstream)) != NULL)
 			{
 				//Lies Zeile ein
-				record = strtok(line, ",");
-				for (int j = 0; j < 785; j++)
+				record = strtok(line, ";");
+				for (int j = 0; j < dataDimension + 1; j++)
 				{
 					data[j] = atoi(record);
-					record = strtok(NULL, ",");
+					record = strtok(NULL, ";");
 				}
-				
+
 				//Zeile wurde eingelesen
-				
+
 				//Zeile verarbeiten
-				
-				int label = data[0];
+
+				int label = data[dataDimension];
+
+
 				//<Forwardprop>
 				//Berechne outputs des hidden layers
 				for (int i = 0; i < 300; i++) {
 					double outputSum = 0;
-					for (int j = 1; j < 785; j++)
+					for (int j = 0; j < dataDimension; j++)
 					{
-						outputSum += hiddenWeights[i][j - 1] * data[j];
+						outputSum += hiddenWeights[i][j] * data[j];
 					}
 					outputSum /= 255;
 					outputSum += hiddenBias[i];
@@ -117,7 +119,7 @@ void train(const char *  filename)
 				}
 
 				//Berechne outputs des output layers
-				for (int i = 0; i < 10; i++) {
+				for (int i = 0; i < 2; i++) {
 					double outputSum = 0;
 					for (int j = 0; j < 300; j++)
 					{
@@ -132,21 +134,21 @@ void train(const char *  filename)
 				//Finde gr??ten Wert
 				int biggestIndex = -1;
 				double biggestOutput = -1;
-				for (int i = 0; i < 10; i++) {
+				for (int i = 0; i < 2; i++) {
 					if (outputOutputs[i] > biggestOutput) {
 						biggestIndex = i;
 						biggestOutput = outputOutputs[i];
 					}
 				}
 
-				if(label != biggestIndex)
+				if (label != biggestIndex)
 				{
 					error++;
-					
+
 					//<Backprop>
 
 					//Output layer anpassen
-					for (int i = 0; i < 10; i++)
+					for (int i = 0; i < 2; i++)
 					{
 						int y = 0;
 						if (label == i) {
@@ -169,52 +171,52 @@ void train(const char *  filename)
 					{
 						//Error berechnen
 						double outputErrorSum = 0;
-						for (int j = 0; j < 10; j++) {
+						for (int j = 0; j < 2; j++) {
 							outputErrorSum += outputError[j] * outputWeights[j][i];
 						}
 						hiddenError[i] = derivative(hiddenOutputs[i]) * outputErrorSum;
 
 						//Adjust weights
-						for (int j = 1; j < 785; j++) {
-							hiddenWeights[i][j - 1] += LEARN_RATE * hiddenError[i] * data[j];
+						for (int j = 0; j < dataDimension; j++) {
+							hiddenWeights[i][j] += LEARN_RATE * hiddenError[i] * data[j];
 						}
 					}
 
 					//</Backprop>
 				}
-				quotient = (double)error/zeileNummer;
-				if(zeileNummer % 100 == 0)
+				quotient = (double)error / zeileNummer;
+				if (zeileNummer % 100 == 0)
 				{
 					printf("Iteration: %i, Zeile: %i, Gesucht: %i, Geraten: %i, Fehlerquotient: %f\n", iteration, zeileNummer, label, biggestIndex, quotient);
 				}
-				
+
 				zeileNummer++;
 			}
 			printf("Iteration: %i, Fehlerquotient: %f\n\n", iteration, quotient);
-			
-			//Datei schlie√üen
+
+			//Datei schlieﬂen
 			fclose(fstream);
 		}
-		
-		
-		
+
+
+
 		iteration++;
 	}
-	
-	
+
+
 }
 
 void test(const char *  filename)
 {
 	char buffer[2048];
 	char *record, *line;
-	
+
 	int iteration = 0, zeileNummer = 0, error = 1;
 	double quotient = 1.0;
-	while(iteration < 1 && error > 0)
+	while (iteration < 1 && error > 0)
 	{
 		printf("Iteration %i\n", iteration);
-		
+
 		FILE *fstream = fopen(filename, "r");
 		if (fstream == NULL)
 		{
@@ -223,7 +225,7 @@ void test(const char *  filename)
 		else
 		{
 			//Datei wurde geoeffnet
-			
+
 			error = 0;
 			zeileNummer = 0;
 			//Gehe durch alle Zeilen durch
@@ -231,25 +233,25 @@ void test(const char *  filename)
 			{
 				//Lies Zeile ein
 				record = strtok(line, ",");
-				for (int j = 0; j < 785; j++)
+				for (int j = 0; j < dataDimension + 1; j++)
 				{
 					data[j] = atoi(record);
 					record = strtok(NULL, ",");
 				}
-				
+
 				//Zeile wurde eingelesen
-				
+
 				//Zeile verarbeiten
-				
-				int label = data[0];
+
+				int label = data[dataDimension];
 
 				//<Forwardprop>
 				//Berechne outputs des hidden layers
 				for (int i = 0; i < 300; i++) {
 					double outputSum = 0;
-					for (int j = 1; j < 785; j++)
+					for (int j = 1; j < dataDimension; j++)
 					{
-						outputSum += hiddenWeights[i][j - 1] * data[j];
+						outputSum += hiddenWeights[i][j] * data[j];
 					}
 					outputSum /= 255;
 					outputSum += hiddenBias[i];
@@ -257,7 +259,7 @@ void test(const char *  filename)
 				}
 
 				//Berechne outputs des output layers
-				for (int i = 0; i < 10; i++) {
+				for (int i = 0; i < 2; i++) {
 					double outputSum = 0;
 					for (int j = 0; j < 300; j++)
 					{
@@ -272,36 +274,36 @@ void test(const char *  filename)
 				//Finde gr??ten Wert
 				int biggestIndex = -1;
 				double biggestOutput = -1;
-				for (int i = 0; i < 10; i++) {
+				for (int i = 0; i < 2; i++) {
 					if (outputOutputs[i] > biggestOutput) {
 						biggestIndex = i;
 						biggestOutput = outputOutputs[i];
 					}
 				}
 
-				if(label != biggestIndex)
+				if (label != biggestIndex)
 				{
 					error++;
 				}
-				
-				quotient = (double)error/zeileNummer;
-				if(zeileNummer % 100 == 0)
+
+				quotient = (double)error / zeileNummer;
+				if (zeileNummer % 100 == 0)
 				{
 					printf("Test: Zeile: %i, Gesucht: %i, Geraten: %i, Fehlerquotient: %f\n", zeileNummer, label, biggestIndex, quotient);
 				}
-				
+
 				zeileNummer++;
 			}
-			
+
 			printf("Fehlerquote: (%i/%i) = %f\n\n", error, zeileNummer, quotient);
-			
-			//Datei schlie√üen
+
+			//Datei schlieﬂen
 			fclose(fstream);
 		}
-		
-		
+
+
 		iteration++;
 	}
-	
-	
+
+
 }
