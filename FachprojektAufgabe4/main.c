@@ -19,11 +19,11 @@ double outputBias[2];
 double outputOutputs[2];
 double outputError[2];
 
-double LEARN_RATE = 0.1;
+double LEARN_RATE = 0.0005;
 
 double sigmoid(double x)
 {
-	double exp_val = exp(-1 * x);
+	double exp_val = exp(-7 * x);
 
 	return 1.0 / (1.0 + exp_val);
 }
@@ -39,12 +39,12 @@ int main() {
 	//randomize weight
 	for (int i = 0; i < 300; i++) {
 		for (int j = 0; j < dataDimension; j++) {
-			hiddenWeights[i][j] = randfrom(-1, 1);
+			hiddenWeights[i][j] = randfrom(-0.05, 0.05);
 		}
 	}
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 300; j++) {
-			outputWeights[i][j] = randfrom(-1, 1);
+			outputWeights[i][j] = randfrom(-0.05, 0.05);
 		}
 	}
 
