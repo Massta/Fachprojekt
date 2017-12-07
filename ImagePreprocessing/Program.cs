@@ -13,65 +13,52 @@ namespace ImagePreprocessing
 {
     public class Program
     {
-        const string TEST_PATH = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Test";
-        const string OUTPUT_PATH = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Edited";
-        const string STRETCHED_PATH = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\1.0 Stretched";
+        const string PATH_TEST = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Test";
+        const string PATH_TRAIN = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train";
+        const string PATH_OUTPUT = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Edited";
+        const string PATH_STRETCHED = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\1.0 Stretched";
+        const string PATH_GRAY_TEST = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Grayscale Test";
+        const string PATH_GRAY_TRAIN = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Grayscale Train";
         static void Main(string[] args)
         {
             Console.WriteLine("Reading files...");
-            var files = Directory.GetFiles(TEST_PATH);
-            decimal maxAspectRatio = 0;
-            decimal averageAspectRatioQuer = 0;
-            decimal averageAspectRatioHoch = 0;
+            var files = Directory.GetFiles(PATH_TRAIN);
             Console.WriteLine("Loading images...");
+
+            var csvPath = Path.Combine(PATH_GRAY_TRAIN, "Train.csv");
 
             var images = files.Select(f => System.Drawing.Image.FromFile(f));
 
-            //var querkant = images.Where(i => i.Width > i.Height);
-            //var hochkant = images.Where(i => i.Width < i.Height);
-            //var gleichkant = images.Where(i => i.Width == i.Height);
-
-            //var querkantAspectRatio = querkant.Sum(q => (double)q.Width / (double)q.Height) / (double)querkant.Count();
-            //Console.WriteLine($"Querkant: {querkant.Count()} Seitenverhältnis: {querkantAspectRatio}");
-
-            //var hochkantAspectRatio = hochkant.Sum(q => (double)q.Width / (double)q.Height) / (double)hochkant.Count();
-            //Console.WriteLine($"Hochkant: {hochkant.Count()} Seitenverhältnis: {hochkantAspectRatio}");
-
-            //Console.WriteLine($"Gleichkant: {gleichkant.Count()}");
-
             int i = 0;
+            StringBuilder csvText = new StringBuilder();
             foreach (var image in images)
             {
                 var resized = ResizeImage(image, 64, 64);
                 string fileName = Path.GetFileName(files.ElementAt(i));
-                resized.Save(Path.Combine(STRETCHED_PATH, fileName), ImageFormat.Jpeg);
+                string label = fileName.Contains("cat") ? "cat" : "dog";
+                //resized.Save(Path.Combine(STRETCHED_PATH, fileName), ImageFormat.Jpeg);
+                Bitmap original = new Bitmap(resized);
+                Bitmap grayscale = new Bitmap(original.Width, original.Height);
+                int x, y;
+
+
+                // Loop through the images pixels to reset color.
+                for (x = 0; x < original.Width; x++)
+                {
+                    for (y = 0; y < original.Height; y++)
+                    {
+                        Color oc = original.GetPixel(x, y);
+                        int grayScale = (int)((oc.R * 0.3) + (oc.G * 0.59) + (oc.B * 0.11));
+                        Color nc = Color.FromArgb(oc.A, grayScale, grayScale, grayScale);
+                        grayscale.SetPixel(x, y, nc);
+                        csvText.Append($"{grayScale};");
+                    }
+                }
+                csvText.Append(label + "\n");
+                grayscale.Save(Path.Combine(PATH_GRAY_TRAIN, fileName), ImageFormat.Jpeg);
                 i++;
             }
-
-            //foreach (var file in files)
-            //{
-            //    var testFile = Path.Combine(TEST_PATH, file);//files[0];
-            //    var testImage = System.Drawing.Image.FromFile(testFile);
-            //    decimal aspectRatio = testImage.Width / testImage.Height;
-            //    if (aspectRatio > 1)
-            //    {
-            //        //Querkant
-            //        averageAspectRatioQuer += aspectRatio / files.Count();
-            //    }
-            //    else
-            //    {
-            //        //Hochkant
-            //        averageAspectRatioHoch += aspectRatio / files.Count();
-            //    }
-            //    if (aspectRatio > maxAspectRatio)
-            //    {
-            //        Console.WriteLine($"Datei {testFile} w: {testImage.Width} h: {testImage.Height}");
-            //        maxAspectRatio = aspectRatio;
-            //    }
-            //}
-            //Console.WriteLine($"Average Quer aspect: {averageAspectRatioQuer}, Average Hoch aspect: {averageAspectRatioHoch}");
-            //var resized = ResizeImage(testImage, 128, 128);
-            //resized.Save(Path.Combine(OUTPUT_PATH, "1.jpg"), ImageFormat.Jpeg);
+            File.WriteAllText(csvPath, csvText.ToString());
         }
 
         public static Bitmap ResizeImage(System.Drawing.Image image, int width, int height)

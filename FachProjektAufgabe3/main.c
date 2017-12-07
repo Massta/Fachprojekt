@@ -103,32 +103,8 @@ void train(const char *  filename)
 				//Zeile verarbeiten
 				
 				int label = data[0];
-
-				//<Forwardprop>
-				//Berechne outputs des hidden layers
-				for (int i = 0; i < 300; i++) {
-					double outputSum = 0;
-					for (int j = 1; j < 785; j++)
-					{
-						outputSum += hiddenWeights[i][j - 1] * data[j];
-					}
-					outputSum /= 255;
-					outputSum += hiddenBias[i];
-					hiddenOutputs[i] = sigmoid(outputSum);
-				}
-
-				//Berechne outputs des output layers
-				for (int i = 0; i < 10; i++) {
-					double outputSum = 0;
-					for (int j = 0; j < 300; j++)
-					{
-						outputSum += outputWeights[i][j] * hiddenOutputs[j];
-					}
-					outputSum;
-					outputSum += outputBias[i];
-					outputOutputs[i] = sigmoid(outputSum);
-				}
-				//</Forwardprop>
+				
+				ForwardPropagation();
 
 				//Finde gr??ten Wert
 				int biggestIndex = -1;
@@ -203,6 +179,35 @@ void train(const char *  filename)
 	}
 	
 	
+}
+
+void ForwardPropagation()
+{
+	//<Forwardprop>
+	//Berechne outputs des hidden layers
+	for (int i = 0; i < 300; i++) {
+		double outputSum = 0;
+		for (int j = 1; j < 785; j++)
+		{
+			outputSum += hiddenWeights[i][j - 1] * data[j];
+		}
+		outputSum /= 255;
+		outputSum += hiddenBias[i];
+		hiddenOutputs[i] = sigmoid(outputSum);
+	}
+
+	//Berechne outputs des output layers
+	for (int i = 0; i < 10; i++) {
+		double outputSum = 0;
+		for (int j = 0; j < 300; j++)
+		{
+			outputSum += outputWeights[i][j] * hiddenOutputs[j];
+		}
+		outputSum;
+		outputSum += outputBias[i];
+		outputOutputs[i] = sigmoid(outputSum);
+	}
+	//</Forwardprop>
 }
 
 void test(const char *  filename)
