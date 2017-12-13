@@ -8,3 +8,5 @@ Hierbei wird für alle 16 Filter für alle 16 Patches ein 16x1x1 Patch erzeugt, wa
 Dies wird gemacht bis die gewünschte Zielbreite/Höhe erreicht ist. Ab dann wählt man nur noch einen Filterblock (zB)
 Das ganze dann in Fully connected
 Ganz wichtig, backprop braucht gewichte für ALLES
+
+Wichtig: Die ganzen Schritte in batches von ~8 durchführen

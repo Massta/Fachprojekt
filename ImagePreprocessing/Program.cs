@@ -17,35 +17,35 @@ namespace ImagePreprocessing
         const string PATH_TRAIN = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train";
         const string PATH_OUTPUT = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Edited";
         const string PATH_STRETCHED = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\1.0 Stretched";
-        const string PATH_GRAY_TEST = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Grayscale Test";
-        const string PATH_GRAY_TRAIN = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Grayscale Train";
+        const string PATH_TEST_SMALL_GRAY = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Test_Small_Grayscale";
+        const string PATH_TRAIN_SMALL_GRAY = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale";
         static void Main(string[] args)
         {
-            var lines = File.ReadAllLines(Path.Combine(PATH_GRAY_TRAIN, "Train_num.csv"));
-            var cats = lines.Take(2500).ToArray();
-            var dogs = lines.Skip(12500).Take(2500).ToArray();
-            StringBuilder newCsv = new StringBuilder();
-            int catC = 0;
-            int dogC = 0;
-            for (int j = 0; j < 5000; j++)
-            {
-                if (j % 2 == 0)
-                {
-                    newCsv.AppendLine(cats[catC]);
-                    catC++;
-                }
-                else
-                {
-                    newCsv.AppendLine(dogs[dogC]);
-                    dogC++;
-                }
-            }
-            File.WriteAllText(Path.Combine(PATH_GRAY_TRAIN, "Train_num_ordered_small.csv"), newCsv.ToString());
+            //var lines = File.ReadAllLines(Path.Combine(PATH_TRAIN_SMALL_GRAY, "Train_num.csv"));
+            //var cats = lines.Take(2500).ToArray();
+            //var dogs = lines.Skip(12500).Take(2500).ToArray();
+            //StringBuilder newCsv = new StringBuilder();
+            //int catC = 0;
+            //int dogC = 0;
+            //for (int j = 0; j < 5000; j++)
+            //{
+            //    if (j % 2 == 0)
+            //    {
+            //        newCsv.AppendLine(cats[catC]);
+            //        catC++;
+            //    }
+            //    else
+            //    {
+            //        newCsv.AppendLine(dogs[dogC]);
+            //        dogC++;
+            //    }
+            //}
+            //File.WriteAllText(Path.Combine(PATH_TRAIN_SMALL_GRAY, "Train_num_ordered_small.csv"), newCsv.ToString());
             Console.WriteLine("Reading files...");
             var files = Directory.GetFiles(PATH_TRAIN);
             Console.WriteLine("Loading images...");
 
-            var csvPath = Path.Combine(PATH_GRAY_TRAIN, "Train.csv");
+            var csvPath = Path.Combine(PATH_TRAIN_SMALL_GRAY, "Train.csv");
 
             var images = files.Select(f => System.Drawing.Image.FromFile(f));
 
@@ -75,7 +75,7 @@ namespace ImagePreprocessing
                     }
                 }
                 csvText.Append(label + "\n");
-                grayscale.Save(Path.Combine(PATH_GRAY_TRAIN, fileName), ImageFormat.Jpeg);
+                grayscale.Save(Path.Combine(PATH_TRAIN_SMALL_GRAY, fileName), ImageFormat.Jpeg);
                 i++;
             }
             File.WriteAllText(csvPath, csvText.ToString());
