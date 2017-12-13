@@ -7,8 +7,6 @@
 #include <math.h>
 #include "main.h"
 
-#define ARRAYSIZE(x)  (sizeof(x)/sizeof(*(x)))
-
 double hiddenWeights[300][64*64];
 double hiddenBias[300];
 double hiddenOutputs[300];

@@ -28,5 +28,8 @@
     <Text Include="train_small.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="Todo.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

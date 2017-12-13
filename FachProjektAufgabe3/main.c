@@ -9,6 +9,11 @@
 
 #define ARRAYSIZE(x)  (sizeof(x)/sizeof(*(x)))
 
+//Batch size 32-512
+//5-8 layer
+//parallel
+//^batch
+
 double hiddenWeights[300][784];
 double hiddenBias[300];
 double hiddenOutputs[300];

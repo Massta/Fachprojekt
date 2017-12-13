@@ -1,0 +1,10 @@
+Ausgang:
+64x64 Bild (Graustufen)
+Wähle 32 Convolution Filter (2x2 Matrizen, random generiert) als Tensor (32x2x2)
+Gehe mit jedem Filter über das Bild, was 32 32x32 Bilder generiert (als Tensor - 32x32x32)
+Wähle 16 Convolution Filter-Blöcke (16x2x2)
+Gehe mit jedem Filter über den Tensor an Bildern, wobei jeder Filter auf alle 3d-Bild-patches angewendet wird.
+Hierbei wird für alle 16 Filter für alle 16 Patches ein 16x1x1 Patch erzeugt, was geaveraged mit Gewichten wird und zu einem Pixel auf dem neuen 16x16x16 Tensor
+Dies wird gemacht bis die gewünschte Zielbreite/Höhe erreicht ist. Ab dann wählt man nur noch einen Filterblock (zB)
+Das ganze dann in Fully connected
+Ganz wichtig, backprop braucht gewichte für ALLES
