@@ -26,6 +26,7 @@ namespace FachprojektAufgabe5
         public const int FILTER2_STRIDE = 2;
         public static double[][][,] Filters2;
         public static double[][,] Filters2Result;
+        public static double[][] Filter2Weights;
 
         static Random random = new Random();
 
@@ -45,12 +46,15 @@ namespace FachprojektAufgabe5
 
             Filters2 = new double[FILTER2_AMOUNT][][,];
             Filters2Result = new double[FILTER2_AMOUNT][,];
+            Filter2Weights = new double[FILTER2_AMOUNT][];
             for (int i = 0; i < FILTER2_AMOUNT; i++)
             {
                 Filters2[i] = new double[FILTER1_AMOUNT][,];
+                Filter2Weights[i] = new double[FILTER1_AMOUNT];
                 for (int j = 0; j < FILTER1_AMOUNT; j++)
                 {
                     Filters2[i][j] = GenerateWeightMatrix(FILTER2_SIZE, -0.5, 1);
+                    Filter2Weights[i][j] = GetRandomNumber(-1, 1);
                 }
             }
 
@@ -185,6 +189,11 @@ namespace FachprojektAufgabe5
                     yield return (random.NextDouble() * (max - min)) + min;
                 }
             }
+        }
+
+        private static double GetRandomNumber( double min, double max)
+        {
+            return (random.NextDouble() * (max - min)) + min;
         }
         private static int Clamp(int value, int min, int max)
         {
