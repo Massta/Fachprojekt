@@ -40,7 +40,7 @@ namespace FachprojektAufgabe5
             Filters1Result = new double[FILTER1_AMOUNT][,];
             for (int i = 0; i < FILTER1_AMOUNT; i++)
             {
-                Filters1[i] = GenerateWeightMatrix(FILTER1_SIZE, -1, 1);
+                Filters1[i] = GenerateWeightMatrix(FILTER1_SIZE, -0.5, 1);
             }
 
             Filters2 = new double[FILTER2_AMOUNT][][,];
@@ -50,7 +50,7 @@ namespace FachprojektAufgabe5
                 Filters2[i] = new double[FILTER1_AMOUNT][,];
                 for (int j = 0; j < FILTER1_AMOUNT; j++)
                 {
-                    Filters2[i][j] = GenerateWeightMatrix(FILTER2_SIZE, -1, 1);
+                    Filters2[i][j] = GenerateWeightMatrix(FILTER2_SIZE, -0.5, 1);
                 }
             }
 
@@ -82,22 +82,22 @@ namespace FachprojektAufgabe5
                 {
                     var ft = Filters2[fti]; //Filtertensor = Filterwürfel
                     Filters2Result[fti] = new double[FILTER2_AMOUNT, FILTER2_AMOUNT]; //Jede der 16 Ergebnisscheiben ist 16x16 groß
-                    for (int f = 0; f < ft.Length; f++) //Schleife um alle 32 schichten im aktuellen Tensor
+                    for (int x = 0; x < Filters1Result.GetLength(0); x += FILTER2_STRIDE)
                     {
-                        var filter = ft[f]; //Filter = 2x2 Filter an Stelle f im Filtertensor
-                        var f1resultImage = Filters1Result[f]; //Bild an Stelle f
-                        for (int x = 0; x < f1resultImage.GetLength(0); x += FILTER2_STRIDE)
+                        for (int y = 0; y < Filters1Result.GetLength(0); y += FILTER2_STRIDE)
                         {
-                            for (int y = 0; y < f1resultImage.GetLength(0); y += FILTER2_STRIDE)
+                            for (int d = 0; d < 32; d++) //Schleife um alle 32 schichten im aktuellen Tensor
                             {
+                                var filter = ft[d]; //Filter = 2x2 Filter an Stelle f im Filtertensor
+                                var f1resultImage = Filters1Result[d]; //Bild an Stelle f
                                 Filters2Result[fti][x / 2, y / 2] += (f1resultImage[x, y] * filter[0, 0]
                                     + f1resultImage[x + 1, y] * filter[1, 0]
                                     + f1resultImage[x, y + 1] * filter[0, 1]
-                                    + f1resultImage[x + 1, y + 1] * filter[1, 1]) / FILTER1_AMOUNT;
+                                    + f1resultImage[x + 1, y + 1] * filter[1, 1]) / 32;
                             }
                         }
                     }
-                    PrintResult(Filters2Result[fti], -1, 2, fti);
+                    PrintResult(Filters2Result[fti], imageIndex, 2, fti);
                 }
 
 
