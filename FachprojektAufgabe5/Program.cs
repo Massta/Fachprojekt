@@ -21,6 +21,12 @@ namespace FachprojektAufgabe5
         public static double[][,] Filters1;
         public static double[][,] Filters1Result;
 
+        public const int FILTER2_AMOUNT = 16;
+        public const int FILTER2_SIZE = 2;
+        public const int FILTER2_STRIDE = 2;
+        public static double[][][,] Filters2;
+        public static double[][,] Filters2Result;
+
         static Random random = new Random();
 
         static void Main(string[] args)
@@ -34,13 +40,26 @@ namespace FachprojektAufgabe5
             Filters1Result = new double[FILTER1_AMOUNT][,];
             for (int i = 0; i < FILTER1_AMOUNT; i++)
             {
-                Filters1[i] = GenerateWeightMatrix(FILTER1_SIZE, -0.5, 0.5);
+                Filters1[i] = GenerateWeightMatrix(FILTER1_SIZE, -1, 1);
             }
 
-            for (int i = 0; i < imageData.Count(); i++)
+            Filters2 = new double[FILTER2_AMOUNT][][,];
+            Filters2Result = new double[FILTER2_AMOUNT][,];
+            for (int i = 0; i < FILTER2_AMOUNT; i++)
             {
-                var image = imageData[i];
+                Filters2[i] = new double[FILTER1_AMOUNT][,];
+                for (int j = 0; j < FILTER1_AMOUNT; j++)
+                {
+                    Filters2[i][j] = GenerateWeightMatrix(FILTER2_SIZE, -1, 1);
+                }
+            }
 
+            for (int imageIndex = 0; imageIndex < imageData.Count(); imageIndex++)
+            {
+                var image = imageData[imageIndex];
+                double[,] dst = new double[image.GetLength(0), image.GetLength(1)];
+                Array.Copy(image, dst, image.Length);
+                PrintResult(dst, imageIndex, 0, -1);
                 //Use filters 1
                 for (int f = 0; f < FILTER1_AMOUNT; f++)
                 {
@@ -56,12 +75,36 @@ namespace FachprojektAufgabe5
                                 + image[x + 1, y + 1] * filter[1, 1];
                         }
                     }
-                    PrintResult(Filters1Result[f], f);
+                    PrintResult(Filters1Result[f], imageIndex, 1, f);
                 }
+                //Use filters 2
+                for (int fti = 0; fti < FILTER2_AMOUNT; fti++) //Schleife um alle 16 Filter Tensoren
+                {
+                    var ft = Filters2[fti]; //Filtertensor = Filterwürfel
+                    Filters2Result[fti] = new double[FILTER2_AMOUNT, FILTER2_AMOUNT]; //Jede der 16 Ergebnisscheiben ist 16x16 groß
+                    for (int f = 0; f < ft.Length; f++) //Schleife um alle 32 schichten im aktuellen Tensor
+                    {
+                        var filter = ft[f]; //Filter = 2x2 Filter an Stelle f im Filtertensor
+                        var f1resultImage = Filters1Result[f]; //Bild an Stelle f
+                        for (int x = 0; x < f1resultImage.GetLength(0); x += FILTER2_STRIDE)
+                        {
+                            for (int y = 0; y < f1resultImage.GetLength(0); y += FILTER2_STRIDE)
+                            {
+                                Filters2Result[fti][x / 2, y / 2] += (f1resultImage[x, y] * filter[0, 0]
+                                    + f1resultImage[x + 1, y] * filter[1, 0]
+                                    + f1resultImage[x, y + 1] * filter[0, 1]
+                                    + f1resultImage[x + 1, y + 1] * filter[1, 1]) / FILTER1_AMOUNT;
+                            }
+                        }
+                    }
+                    PrintResult(Filters2Result[fti], -1, 2, fti);
+                }
+
+
             }
         }
 
-        private static void PrintResult(double[,] image, int index)
+        private static void PrintResult(double[,] image, int imageIndex, int filterLevel, int filterIndex)
         {
             Bitmap grayscale = new Bitmap(image.GetLength(0), image.GetLength(0));
             int x, y;
@@ -72,12 +115,12 @@ namespace FachprojektAufgabe5
             {
                 for (y = 0; y < image.GetLength(0); y++)
                 {
-                    int grayScale = Clamp((int)(image[x, y] * 255),0,255);
+                    int grayScale = Clamp((int)(image[x, y]), 0, 255);
                     Color nc = Color.FromArgb(0, grayScale, grayScale, grayScale);
                     grayscale.SetPixel(x, y, nc);
                 }
             }
-            grayscale.Save(Path.Combine(PATH_TRAIN_SMALL_GRAY_FILTER1, $"{index}.jpg"), ImageFormat.Jpeg);
+            grayscale.Save(Path.Combine(PATH_TRAIN_SMALL_GRAY_FILTER1, $"{imageIndex}.{filterLevel}.{filterIndex}.jpg"), ImageFormat.Jpeg);
         }
 
         private static int[][,] ReadCsv(string csvPath)
@@ -96,14 +139,24 @@ namespace FachprojektAufgabe5
         }
         private static int[,] ConvertMatrix(int[] flat, int m, int n)
         {
-            if (flat.Length != m * n)
-            {
-                throw new ArgumentException("Invalid length");
-            }
             int[,] ret = new int[m, n];
-            // BlockCopy uses byte lengths: a double is 8 bytes
-            Buffer.BlockCopy(flat, 0, ret, 0, flat.Length * sizeof(int));
+            for (int i = 0; i < m; i++)
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    ret[i, j] = flat[i * m + j];
+                }
+            }
             return ret;
+
+            //if (flat.Length != m * n)
+            //{
+            //    throw new ArgumentException("Invalid length");
+            //}
+            //int[,] ret = new int[m, n];
+            //// BlockCopy uses byte lengths: a double is 8 bytes
+            //Buffer.BlockCopy(flat, 0, ret, 0, flat.Length * sizeof(int));
+            //return ret;
         }
         private static double[,] GenerateWeightMatrix(int size, double min, double max)
         {
