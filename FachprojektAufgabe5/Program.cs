@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,6 +19,7 @@ namespace FachprojektAufgabe5
         public const int FILTER1_SIZE = 2;
         public const int FILTER1_STRIDE = 2;
         public static double[][,] Filters1;
+        public static double[][,] Filters1Result;
 
         static Random random = new Random();
 
@@ -28,6 +31,7 @@ namespace FachprojektAufgabe5
 
             //Load filters
             Filters1 = new double[FILTER1_AMOUNT][,];
+            Filters1Result = new double[FILTER1_AMOUNT][,];
             for (int i = 0; i < FILTER1_AMOUNT; i++)
             {
                 Filters1[i] = GenerateWeightMatrix(FILTER1_SIZE, -0.5, 0.5);
@@ -36,7 +40,44 @@ namespace FachprojektAufgabe5
             for (int i = 0; i < imageData.Count(); i++)
             {
                 var image = imageData[i];
+
+                //Use filters 1
+                for (int f = 0; f < FILTER1_AMOUNT; f++)
+                {
+                    var filter = Filters1[f];
+                    Filters1Result[f] = new double[FILTER1_AMOUNT, FILTER1_AMOUNT];
+                    for (int x = 0; x < image.GetLength(0); x += FILTER1_STRIDE)
+                    {
+                        for (int y = 0; y < image.GetLength(0); y += FILTER1_STRIDE)
+                        {
+                            Filters1Result[f][x / 2, y / 2] = image[x, y] * filter[0, 0]
+                                + image[x + 1, y] * filter[1, 0]
+                                + image[x, y + 1] * filter[0, 1]
+                                + image[x + 1, y + 1] * filter[1, 1];
+                        }
+                    }
+                    PrintResult(Filters1Result[f], f);
+                }
             }
+        }
+
+        private static void PrintResult(double[,] image, int index)
+        {
+            Bitmap grayscale = new Bitmap(image.GetLength(0), image.GetLength(0));
+            int x, y;
+
+
+            // Loop through the images pixels to reset color.
+            for (x = 0; x < image.GetLength(0); x++)
+            {
+                for (y = 0; y < image.GetLength(0); y++)
+                {
+                    int grayScale = Clamp((int)(image[x, y] * 255),0,255);
+                    Color nc = Color.FromArgb(0, grayScale, grayScale, grayScale);
+                    grayscale.SetPixel(x, y, nc);
+                }
+            }
+            grayscale.Save(Path.Combine(PATH_TRAIN_SMALL_GRAY_FILTER1, $"{index}.jpg"), ImageFormat.Jpeg);
         }
 
         private static int[][,] ReadCsv(string csvPath)
@@ -66,13 +107,13 @@ namespace FachprojektAufgabe5
         }
         private static double[,] GenerateWeightMatrix(int size, double min, double max)
         {
-            double[,] weights = new double[size,size];
+            double[,] weights = new double[size, size];
             for (int i = 0; i < size; i++)
             {
                 var tempWeights = GenerateWeightArray(size, min, max);
-                for(int j = 0; j < tempWeights.Count(); j++)
+                for (int j = 0; j < tempWeights.Count(); j++)
                 {
-                    weights[i,j] = tempWeights[j];
+                    weights[i, j] = tempWeights[j];
                 }
             }
             return weights;
@@ -91,6 +132,10 @@ namespace FachprojektAufgabe5
                     yield return (random.NextDouble() * (max - min)) + min;
                 }
             }
+        }
+        private static int Clamp(int value, int min, int max)
+        {
+            return (value < min) ? min : (value > max) ? max : value;
         }
     }
 }
