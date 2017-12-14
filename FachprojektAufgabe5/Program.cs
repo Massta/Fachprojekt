@@ -28,6 +28,13 @@ namespace FachprojektAufgabe5
         public static double[][,] Filters2Result;
         public static double[][] Filter2Weights;
 
+        public const int FILTER3_AMOUNT = 8;
+        public const int FILTER3_SIZE = 2;
+        public const int FILTER3_STRIDE = 2;
+        public static double[][][,] Filters3;
+        public static double[][,] Filters3Result;
+        public static double[][] Filter3Weights;
+
         static Random random = new Random();
 
         static void Main(string[] args)
@@ -54,7 +61,21 @@ namespace FachprojektAufgabe5
                 for (int j = 0; j < FILTER1_AMOUNT; j++)
                 {
                     Filters2[i][j] = GenerateWeightMatrix(FILTER2_SIZE, -0.5, 1);
-                    Filter2Weights[i][j] = GetRandomNumber(-1, 1);
+                    Filter2Weights[i][j] = GetRandomNumber(0, 2);
+                }
+            }
+
+            Filters3 = new double[FILTER3_AMOUNT][][,];
+            Filters3Result = new double[FILTER3_AMOUNT][,];
+            Filter3Weights = new double[FILTER3_AMOUNT][];
+            for (int i = 0; i < FILTER3_AMOUNT; i++)
+            {
+                Filters3[i] = new double[FILTER2_AMOUNT][,];
+                Filter3Weights[i] = new double[FILTER2_AMOUNT];
+                for (int j = 0; j < FILTER2_AMOUNT; j++)
+                {
+                    Filters3[i][j] = GenerateWeightMatrix(FILTER3_SIZE, -0.5, 1);
+                    Filter3Weights[i][j] = GetRandomNumber(0, 2);
                 }
             }
 
@@ -63,7 +84,7 @@ namespace FachprojektAufgabe5
                 var image = imageData[imageIndex];
                 double[,] dst = new double[image.GetLength(0), image.GetLength(1)];
                 Array.Copy(image, dst, image.Length);
-                PrintResult(dst, imageIndex, 0, -1);
+                //PrintResult(dst, imageIndex, 0, -1);
                 //Use filters 1
                 for (int f = 0; f < FILTER1_AMOUNT; f++)
                 {
@@ -97,11 +118,33 @@ namespace FachprojektAufgabe5
                                 Filters2Result[fti][x / 2, y / 2] += (f1resultImage[x, y] * filter[0, 0]
                                     + f1resultImage[x + 1, y] * filter[1, 0]
                                     + f1resultImage[x, y + 1] * filter[0, 1]
-                                    + f1resultImage[x + 1, y + 1] * filter[1, 1]) / 32;
+                                    + f1resultImage[x + 1, y + 1] * filter[1, 1]) * (1d / 32d) * Filter2Weights[fti][d];
                             }
                         }
                     }
                     PrintResult(Filters2Result[fti], imageIndex, 2, fti);
+                }
+                //Use filters 3
+                for (int fti = 0; fti < FILTER3_AMOUNT; fti++) //Schleife um alle 8 Filter Tensoren
+                {
+                    var ft = Filters3[fti]; //Filtertensor = Filterwürfel
+                    Filters3Result[fti] = new double[FILTER3_AMOUNT, FILTER3_AMOUNT]; //Jede der 8 Ergebnisscheiben ist 8x8 groß
+                    for (int x = 0; x < Filters2Result.GetLength(0); x += FILTER3_STRIDE)
+                    {
+                        for (int y = 0; y < Filters2Result.GetLength(0); y += FILTER3_STRIDE)
+                        {
+                            for (int d = 0; d < 16; d++) //Schleife um alle 16 schichten im aktuellen Tensor
+                            {
+                                var filter = ft[d]; //Filter = 2x2 Filter an Stelle f im Filtertensor
+                                var f2resultImage = Filters2Result[d]; //Bild an Stelle f
+                                Filters3Result[fti][x / 2, y / 2] += (f2resultImage[x, y] * filter[0, 0]
+                                    + f2resultImage[x + 1, y] * filter[1, 0]
+                                    + f2resultImage[x, y + 1] * filter[0, 1]
+                                    + f2resultImage[x + 1, y + 1] * filter[1, 1]) * (1d / 32d) * Filter3Weights[fti][d];
+                            }
+                        }
+                    }
+                    PrintResult(Filters3Result[fti], imageIndex, 3, fti);
                 }
 
 
@@ -191,7 +234,7 @@ namespace FachprojektAufgabe5
             }
         }
 
-        private static double GetRandomNumber( double min, double max)
+        private static double GetRandomNumber(double min, double max)
         {
             return (random.NextDouble() * (max - min)) + min;
         }
