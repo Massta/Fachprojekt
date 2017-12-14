@@ -10,3 +10,5 @@ Das ganze dann in Fully connected
 Ganz wichtig, backprop braucht gewichte für ALLES
 
 Wichtig: Die ganzen Schritte in batches von ~8 durchführen
+
+Klären: Aktivierungsfunktion bei Convo layer
