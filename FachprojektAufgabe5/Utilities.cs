@@ -121,5 +121,10 @@ namespace FachprojektAufgabe5
         {
             return (value < min) ? min : (value > max) ? max : value;
         }
+
+        public static double Normalize(double colour)
+        {
+            return colour / 255;
+        }
     }
 }

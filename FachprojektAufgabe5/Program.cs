@@ -19,6 +19,8 @@ namespace FachprojektAufgabe5
         public static int[] Labels;
         public const double LEARN_RATE = 0.005;
 
+        #region Convolutional Variables
+
         public const int FILTER1_AMOUNT = 32;
         public const int FILTER1_SIZE = 2;
         public const int FILTER1_STRIDE = 2;
@@ -39,6 +41,10 @@ namespace FachprojektAufgabe5
         public static double[][,] Filters3Result;
         public static double[][] Filter3Weights;
 
+        #endregion
+
+        #region FC Variables
+
         public const int LAYER_HIDDEN_SIZE = 300;
         public const int LAYER_HIDDEN_INPUT = 512;
 
@@ -54,6 +60,8 @@ namespace FachprojektAufgabe5
         public static double[] OutputBias; //2
         public static double[] OutputOutputs; //2
         public static double[] OutputError; //2
+
+        #endregion
 
         static void Main(string[] args)
         {
@@ -185,7 +193,8 @@ namespace FachprojektAufgabe5
 
                 #region FC
 
-                //<Forwardprop>
+                #region Forward Propagation
+
                 //Berechne outputs des hidden layers
                 for (int i = 0; i < LAYER_HIDDEN_SIZE; i++)
                 {
@@ -197,7 +206,7 @@ namespace FachprojektAufgabe5
                         {
                             for (int y = 0; y < Filters3Result[d].GetLength(0); y++)
                             {
-                                outputSum += HiddenWeights[i, counter] * ImageData[d][x, y];
+                                outputSum += HiddenWeights[i, counter] * Utilities.Normalize(Filters3Result[d][x, y]);
                                 counter++;
                             }
                         }
@@ -217,7 +226,11 @@ namespace FachprojektAufgabe5
                     outputSum += OutputBias[i];
                     OutputOutputs[i] = Utilities.Sigmoid(outputSum);
                 }
-                //</Forwardprop>
+
+                #endregion
+
+                #region Output Calculation
+
                 int biggestIndex = -1;
                 double biggestOutput = -1;
                 for (int i = 0; i < LAYER_OUTPUT_SIZE; i++)
@@ -230,6 +243,13 @@ namespace FachprojektAufgabe5
                 }
 
                 Console.WriteLine($"Geraten: {biggestIndex} ({biggestOutput}) Ergebnis: {Labels[imageIndex]}");
+
+                #endregion
+
+                #region Backward Propagation
+
+                #endregion
+
                 #endregion
 
             }
