@@ -19,7 +19,7 @@
             _learnRate = learnRate;
             UseReLu = useReLu;
             _size = size;
-            _weights = Utilities.GenerateWeights(size, -0.1, 0.1);
+            _weights = Utilities.GenerateWeights(size, -0.05, 0.05);
         }
 
         public double GetOutput(double[] inputs)

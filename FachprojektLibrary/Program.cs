@@ -8,10 +8,10 @@ namespace FachprojektLibrary
 {
     class Program
     {
-        public const int LAYER_SIZE_HIDDEN = 220;
+        public const int LAYER_SIZE_HIDDEN = 150;
         public const int LAYER_SIZE_OUTPUT = 10;
-        public const double LEARN_RATE = 0.001;
-        public const double MAXIMUM_ERROR_PERCENTAGE = 0.15;
+        public const double LEARN_RATE = 0.1;
+        public const double MAXIMUM_ERROR_PERCENTAGE = 0.07;
 
         public const int INPUT_DATA_WIDTH = 784;
         static void Main(string[] args)
@@ -73,7 +73,7 @@ namespace FachprojektLibrary
                         Console.WriteLine($"[{epoch}:{currentNumber}/{totalNumbers}] Gegeben: {number.Label} Geraten: {biggestIndex} ({biggestNumber}) Fehlerprozentsatz: {Math.Round(errorPercentage * 100)}% Fehlerprozentsatz (letzte 100): {Math.Round(errorPercentageLast100)}%");
                     }
                     Console.ForegroundColor = ConsoleColor.White;
-                    network.AdjustWeights(number.Label, biggestIndex);
+                    network.AdjustWeights(number.Label, biggestIndex, outputs);
                     currentNumber++;
                 }
                 errorCount = 0;

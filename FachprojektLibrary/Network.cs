@@ -17,7 +17,7 @@
             return oldOutputs;
         }
 
-        public void AdjustWeights(double label, double guess)
+        public void AdjustWeights(double label, double guess, double[] outputs)
         {
             var topLayer = _layers[_layers.Length - 1];
 
@@ -25,8 +25,8 @@
             for (int i = 0; i < topLayer.NeuronAmount; i++)
             {
                 double y = i == label ? 1 : 0;
-                double x = i == guess ? 1 : 0;
-                topError[i] = y - x;
+                double x = outputs[i] > 0.5 ? 1 : 0;//i == guess ? 1 : 0;
+                topError[i] = y-x;
             }
             topLayer.AdjustWeights(topError);
             for (int i = _layers.Length - 2; i >= 0; i--)
