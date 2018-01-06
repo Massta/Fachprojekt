@@ -9,17 +9,18 @@ namespace FachprojektLibrary
     class Program
     {
         public const int LAYER_SIZE_HIDDEN = 150;
-        public const int LAYER_SIZE_OUTPUT = 10;
+        public const int LAYER_SIZE_OUTPUT = 2;
         public const double LEARN_RATE = 0.1;
-        public const double MAXIMUM_ERROR_PERCENTAGE = 0.07;
+        public const double MAXIMUM_ERROR_PERCENTAGE = 0.2;
 
-        public const int INPUT_DATA_WIDTH = 784;
+        public const int INPUT_DATA_WIDTH = 64*64;
         static void Main(string[] args)
         {
             FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(LAYER_SIZE_HIDDEN, INPUT_DATA_WIDTH, false, LEARN_RATE);
             FullyConnectedLayer outputLayer = new FullyConnectedLayer(LAYER_SIZE_OUTPUT, LAYER_SIZE_HIDDEN, false, LEARN_RATE);
             Network network = new Network(hiddenLayer, outputLayer);
-            Number[] trainingNumbers = Utilities.ReadCsv(@"C:\Users\Julius Jacobsohn\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST\mnist_train.csv");
+            //Number[] trainingNumbers = Utilities.ReadCsv(@"C:\Users\Julius Jacobsohn\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST\mnist_train.csv");
+            Number[] trainingNumbers = Utilities.ReadKaggleCsv(@"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale\Train.csv");
             Train(network, trainingNumbers);
 
             string netName = Utilities.GenerateNetworkName(network);
@@ -27,7 +28,7 @@ namespace FachprojektLibrary
             //Utilities.StoreNetwork(network, $@"C:\Users\Julius Jacobsohn\Documents\Visual Studio 2017\Projects\MNIST_Convolutional\MNIST_Convolutional\resource\{netName}.json");
             //TODO
 
-            Number[] testNumbers = Utilities.ReadCsv(@"C:\Users\Julius Jacobsohn\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST\mnist_test.csv");
+            Number[] testNumbers = Utilities.ReadKaggleCsv(@"C:\Users\Julius Jacobsohn\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST\mnist_test.csv");
             Test(network, testNumbers);
         }
 

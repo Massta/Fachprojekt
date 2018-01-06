@@ -40,6 +40,23 @@ namespace FachprojektLibrary
             return weights;
         }
 
+        public static double[,] GenerateFilter(int filterSize, double min, double max)
+        {
+            object syncLock = new object();
+            double[,] filter = new double[filterSize, filterSize];
+            for (int i = 0; i < filterSize; i++)
+            {
+                for (int j = 0; j < filterSize; j++)
+                {
+                    lock (syncLock)
+                    {
+                        filter[i, j] = (random.NextDouble() * (max - min)) + min;
+                    }
+                }
+            }
+            return filter;
+        }
+
         public static string GenerateNetworkName(Network network)
         {
             string networkName = DateTime.Now.ToString("yyyyMMdd_mm_");
@@ -75,6 +92,24 @@ namespace FachprojektLibrary
                 });
             }
             return numberList.ToArray();
+        }
+
+        public static Number[] ReadKaggleCsv(string path)
+        {
+            Console.WriteLine(path);
+            string[] fileInputArray = File.ReadAllLines(path);
+            List<Number> numberList = new List<Number>();
+            foreach (var line in fileInputArray)
+            {
+                string[] lineData = line.Split(';');
+                numberList.Add(new Number
+                {
+                    Label = lineData[64 * 64] == "cat" ? 0 : 1,
+                    Data = lineData.Take(64 * 64).Select(v => double.Parse(v)).ToArray(),
+                });
+            }
+            Number[] randomNumbers = numberList.ToArray().OrderBy(x => random.Next()).ToArray();
+            return randomNumbers;
         }
     }
 }
