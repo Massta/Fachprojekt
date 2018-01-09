@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FachprojektAufgabe5
@@ -17,7 +18,8 @@ namespace FachprojektAufgabe5
 
         public static int[][,] ImageData;
         public static int[] Labels;
-        public const double LEARN_RATE = 0.005;
+        public const double LEARN_RATE = 0.04;
+        public static double GlobalError = 1;
 
         #region Convolutional Variables
 
@@ -40,6 +42,7 @@ namespace FachprojektAufgabe5
         public static double[][][,] Filters3;
         public static double[][,] Filters3Result;
         public static double[][] Filter3Weights;
+        public static double[] Filter3Error;
 
         #endregion
 
@@ -67,7 +70,7 @@ namespace FachprojektAufgabe5
         {
             //Load image data
             #region Convolution Init
-            string csvPath = Path.Combine(PATH_TRAIN_SMALL_GRAY, "Train.csv");
+            string csvPath = Path.Combine(PATH_TRAIN_SMALL_GRAY, "Train_num_ordered_small.csv");
             ImageData = Utilities.ReadCsv(csvPath, out Labels);
 
             //Load filters
@@ -105,6 +108,7 @@ namespace FachprojektAufgabe5
                     Filter3Weights[i][j] = Utilities.GetRandomNumber(0, 2);
                 }
             }
+            Filter3Error = new double[FILTER3_AMOUNT];
 
             #endregion
 
@@ -114,144 +118,238 @@ namespace FachprojektAufgabe5
             HiddenOutputs = new double[300];
             HiddenError = new double[300];
 
-            OutputWeights = Utilities.GenerateWeightMatrix(LAYER_OUTPUT_SIZE, LAYER_OUTPUT_INPUT, -0.5, 0.5);
+            OutputWeights = Utilities.GenerateWeightMatrix(LAYER_OUTPUT_SIZE, LAYER_OUTPUT_INPUT, -0.1, 0.1);
             OutputBias = new double[2];
             OutputOutputs = new double[2];
             OutputError = new double[2];
             #endregion
 
-            for (int imageIndex = 0; imageIndex < ImageData.Count(); imageIndex++)
+            int iteration = 0;
+            while (GlobalError > 0.2)
             {
-                var image = ImageData[imageIndex];
-                double[,] dst = new double[image.GetLength(0), image.GetLength(1)];
-                Array.Copy(image, dst, image.Length);
-                //PrintResult(dst, imageIndex, 0, -1);
-                #region Convolution
-                //Use filters 1
-                for (int f = 0; f < FILTER1_AMOUNT; f++)
+                Console.WriteLine($"==== Starte Iteration {iteration} ====");
+                double errorCount = 0;
+                for (int imageIndex = 0; imageIndex < ImageData.Count(); imageIndex++)
                 {
-                    var filter = Filters1[f];
-                    Filters1Result[f] = new double[FILTER1_AMOUNT, FILTER1_AMOUNT];
-                    for (int x = 0; x < image.GetLength(0); x += FILTER1_STRIDE)
+                    var image = ImageData[imageIndex];
+                    double[,] dst = new double[image.GetLength(0), image.GetLength(1)];
+                    Array.Copy(image, dst, image.Length);
+                    //PrintResult(dst, imageIndex, 0, -1);
+                    #region Convolution
+                    //Use filters 1
+                    for (int f = 0; f < FILTER1_AMOUNT; f++)
                     {
-                        for (int y = 0; y < image.GetLength(0); y += FILTER1_STRIDE)
+                        var filter = Filters1[f];
+                        Filters1Result[f] = new double[FILTER1_AMOUNT, FILTER1_AMOUNT];
+                        for (int x = 0; x < image.GetLength(0); x += FILTER1_STRIDE)
                         {
-                            Filters1Result[f][x / 2, y / 2] = image[x, y] * filter[0, 0]
-                                + image[x + 1, y] * filter[1, 0]
-                                + image[x, y + 1] * filter[0, 1]
-                                + image[x + 1, y + 1] * filter[1, 1];
+                            for (int y = 0; y < image.GetLength(0); y += FILTER1_STRIDE)
+                            {
+                                Filters1Result[f][x / 2, y / 2] = image[x, y] * filter[0, 0]
+                                    + image[x + 1, y] * filter[1, 0]
+                                    + image[x, y + 1] * filter[0, 1]
+                                    + image[x + 1, y + 1] * filter[1, 1];
+                            }
+                        }
+                        //Utilities.PrintResult(Filters1Result[f], imageIndex, 1, f);
+                    }
+                    //Use filters 2
+                    for (int fti = 0; fti < FILTER2_AMOUNT; fti++) //Schleife um alle 16 Filter Tensoren
+                    {
+                        var ft = Filters2[fti]; //Filtertensor = Filterwürfel
+                        Filters2Result[fti] = new double[FILTER2_AMOUNT, FILTER2_AMOUNT]; //Jede der 16 Ergebnisscheiben ist 16x16 groß
+                        for (int x = 0; x < Filters1Result.GetLength(0); x += FILTER2_STRIDE)
+                        {
+                            for (int y = 0; y < Filters1Result.GetLength(0); y += FILTER2_STRIDE)
+                            {
+                                for (int d = 0; d < 32; d++) //Schleife um alle 32 schichten im aktuellen Tensor
+                                {
+                                    var filter = ft[d]; //Filter = 2x2 Filter an Stelle f im Filtertensor
+                                    var f1resultImage = Filters1Result[d]; //Bild an Stelle f
+                                    Filters2Result[fti][x / 2, y / 2] += (f1resultImage[x, y] * filter[0, 0]
+                                        + f1resultImage[x + 1, y] * filter[1, 0]
+                                        + f1resultImage[x, y + 1] * filter[0, 1]
+                                        + f1resultImage[x + 1, y + 1] * filter[1, 1]) * (1d / 32d) * Filter2Weights[fti][d];
+                                }
+                            }
+                        }
+                        //Utilities.PrintResult(Filters2Result[fti], imageIndex, 2, fti);
+                    }
+                    //Use filters 3
+                    for (int fti = 0; fti < FILTER3_AMOUNT; fti++) //Schleife um alle 8 Filter Tensoren
+                    {
+                        var ft = Filters3[fti]; //Filtertensor = Filterwürfel
+                        Filters3Result[fti] = new double[FILTER3_AMOUNT, FILTER3_AMOUNT]; //Jede der 8 Ergebnisscheiben ist 8x8 groß
+                        for (int x = 0; x < Filters2Result.GetLength(0); x += FILTER3_STRIDE)
+                        {
+                            for (int y = 0; y < Filters2Result.GetLength(0); y += FILTER3_STRIDE)
+                            {
+                                for (int d = 0; d < 16; d++) //Schleife um alle 16 schichten im aktuellen Tensor
+                                {
+                                    var filter = ft[d]; //Filter = 2x2 Filter an Stelle f im Filtertensor
+                                    var f2resultImage = Filters2Result[d]; //Bild an Stelle f
+                                    Filters3Result[fti][x / 2, y / 2] += (f2resultImage[x, y] * filter[0, 0]
+                                        + f2resultImage[x + 1, y] * filter[1, 0]
+                                        + f2resultImage[x, y + 1] * filter[0, 1]
+                                        + f2resultImage[x + 1, y + 1] * filter[1, 1]) * (1d / 32d) * Filter3Weights[fti][d];
+                                }
+                            }
+                        }
+                        //Utilities.PrintResult(Filters3Result[fti], imageIndex, 3, fti);
+                    }
+
+                    #endregion
+
+                    #region FC
+
+                    #region Forward Propagation
+
+                    //Berechne outputs des hidden layers
+                    for (int i = 0; i < LAYER_HIDDEN_SIZE; i++)
+                    {
+                        double outputSum = 0;
+                        int counter = 0;
+                        for (int d = 0; d < FILTER3_AMOUNT; d++)
+                        {
+                            for (int x = 0; x < Filters3Result[d].GetLength(0); x++)
+                            {
+                                for (int y = 0; y < Filters3Result[d].GetLength(0); y++)
+                                {
+                                    outputSum += HiddenWeights[i, counter] * Utilities.Normalize(Filters3Result[d][x, y]);
+                                    counter++;
+                                }
+                            }
+                        }
+                        outputSum += HiddenBias[i];
+                        HiddenOutputs[i] = Utilities.Sigmoid(outputSum);
+                    }
+
+                    //Berechne outputs des output layers
+                    for (int i = 0; i < LAYER_OUTPUT_SIZE; i++)
+                    {
+                        double outputSum = 0;
+                        for (int j = 0; j < LAYER_OUTPUT_INPUT; j++)
+                        {
+                            outputSum += OutputWeights[i, j] * HiddenOutputs[j];
+                        }
+                        outputSum += OutputBias[i];
+                        OutputOutputs[i] = Utilities.Sigmoid(outputSum);
+                    }
+
+                    #endregion
+
+                    #region Output Calculation
+
+                    int biggestIndex = -1;
+                    double biggestOutput = -1;
+                    for (int i = 0; i < LAYER_OUTPUT_SIZE; i++)
+                    {
+                        if (OutputOutputs[i] > biggestOutput)
+                        {
+                            biggestIndex = i;
+                            biggestOutput = OutputOutputs[i];
                         }
                     }
-                    Utilities.PrintResult(Filters1Result[f], imageIndex, 1, f);
-                }
-                //Use filters 2
-                for (int fti = 0; fti < FILTER2_AMOUNT; fti++) //Schleife um alle 16 Filter Tensoren
-                {
-                    var ft = Filters2[fti]; //Filtertensor = Filterwürfel
-                    Filters2Result[fti] = new double[FILTER2_AMOUNT, FILTER2_AMOUNT]; //Jede der 16 Ergebnisscheiben ist 16x16 groß
-                    for (int x = 0; x < Filters1Result.GetLength(0); x += FILTER2_STRIDE)
+
+                    Console.WriteLine($"[{imageIndex}/{ImageData.Count()}] Fehler: {errorCount / imageIndex} Geraten: {biggestIndex} ({biggestOutput}) Ergebnis: {Labels[imageIndex]}");
+
+                    #endregion
+
+                    #region Backwards Propagation
+
+                    #region FC Backprop
+
+                    if (biggestIndex != Labels[imageIndex])
                     {
-                        for (int y = 0; y < Filters1Result.GetLength(0); y += FILTER2_STRIDE)
+                        errorCount++;
+                    }
+                    //Output layer anpassen
+                    for (int i = 0; i < LAYER_OUTPUT_SIZE; i++)
+                    {
+                        int y = 0;
+                        if (Labels[imageIndex] == i)
                         {
-                            for (int d = 0; d < 32; d++) //Schleife um alle 32 schichten im aktuellen Tensor
+                            y = 1;
+                        }
+                        int x = 0;
+                        if (OutputOutputs[i] > 0.5)
+                        {
+                            x = 1;
+                        }
+                        //Error berechnen
+                        OutputError[i] = Utilities.SigmoidDerivative(OutputOutputs[i]) * (y - x);
+                        //Adjust weights
+                        for (int j = 0; j < LAYER_OUTPUT_INPUT; j++)
+                        {
+                            OutputWeights[i, j] += LEARN_RATE * OutputError[i] * HiddenOutputs[j];
+                        }
+                    }
+
+                    //Hidden layer anpassen
+                    for (int i = 0; i < LAYER_HIDDEN_SIZE; i++)
+                    {
+                        //Error berechnen
+                        double outputErrorSum = 0;
+                        for (int j = 0; j < LAYER_OUTPUT_SIZE; j++)
+                        {
+                            outputErrorSum += OutputError[j] * OutputWeights[j, i];
+                        }
+                        HiddenError[i] = Utilities.SigmoidDerivative(HiddenOutputs[i]) * outputErrorSum;
+
+                        //Adjust weights
+                        for (int d = 0; d < FILTER3_AMOUNT; d++)
+                        {
+                            for (int x = 0; x < Filters3Result[d].GetLength(0); x++)
                             {
-                                var filter = ft[d]; //Filter = 2x2 Filter an Stelle f im Filtertensor
-                                var f1resultImage = Filters1Result[d]; //Bild an Stelle f
-                                Filters2Result[fti][x / 2, y / 2] += (f1resultImage[x, y] * filter[0, 0]
-                                    + f1resultImage[x + 1, y] * filter[1, 0]
-                                    + f1resultImage[x, y + 1] * filter[0, 1]
-                                    + f1resultImage[x + 1, y + 1] * filter[1, 1]) * (1d / 32d) * Filter2Weights[fti][d];
+                                for (int y = 0; y < Filters3Result[d].GetLength(0); y++)
+                                {
+                                    HiddenWeights[i, d * 64 + x * 8 + y] += LEARN_RATE * HiddenError[i] * Filters3Result[d][x, y];
+                                }
                             }
                         }
                     }
-                    Utilities.PrintResult(Filters2Result[fti], imageIndex, 2, fti);
-                }
-                //Use filters 3
-                for (int fti = 0; fti < FILTER3_AMOUNT; fti++) //Schleife um alle 8 Filter Tensoren
-                {
-                    var ft = Filters3[fti]; //Filtertensor = Filterwürfel
-                    Filters3Result[fti] = new double[FILTER3_AMOUNT, FILTER3_AMOUNT]; //Jede der 8 Ergebnisscheiben ist 8x8 groß
-                    for (int x = 0; x < Filters2Result.GetLength(0); x += FILTER3_STRIDE)
+                    //}
+
+                    #endregion
+
+                    #region Convolution Backprop
+
+
+                    //Use filters 3
+                    for (int fti = 0; fti < FILTER3_AMOUNT; fti++) //Schleife um alle 8 Filter Tensoren
                     {
-                        for (int y = 0; y < Filters2Result.GetLength(0); y += FILTER3_STRIDE)
+                        var ft = Filters3[fti]; //Filtertensor = Filterwürfel
+                        Filters3Result[fti] = new double[FILTER3_AMOUNT, FILTER3_AMOUNT]; //Jede der 8 Ergebnisscheiben ist 8x8 groß
+                        for (int x = 0; x < Filters2Result.GetLength(0); x += FILTER3_STRIDE)
                         {
-                            for (int d = 0; d < 16; d++) //Schleife um alle 16 schichten im aktuellen Tensor
+                            for (int y = 0; y < Filters2Result.GetLength(0); y += FILTER3_STRIDE)
                             {
-                                var filter = ft[d]; //Filter = 2x2 Filter an Stelle f im Filtertensor
-                                var f2resultImage = Filters2Result[d]; //Bild an Stelle f
-                                Filters3Result[fti][x / 2, y / 2] += (f2resultImage[x, y] * filter[0, 0]
-                                    + f2resultImage[x + 1, y] * filter[1, 0]
-                                    + f2resultImage[x, y + 1] * filter[0, 1]
-                                    + f2resultImage[x + 1, y + 1] * filter[1, 1]) * (1d / 32d) * Filter3Weights[fti][d];
+                                for (int d = 0; d < 16; d++) //Schleife um alle 16 schichten im aktuellen Tensor
+                                {
+                                    var filter = ft[d]; //Filter = 2x2 Filter an Stelle f im Filtertensor
+                                    var f2resultImage = Filters2Result[d]; //Bild an Stelle f
+                                    Filters3Result[fti][x / 2, y / 2] += (f2resultImage[x, y] * filter[0, 0]
+                                        + f2resultImage[x + 1, y] * filter[1, 0]
+                                        + f2resultImage[x, y + 1] * filter[0, 1]
+                                        + f2resultImage[x + 1, y + 1] * filter[1, 1]) * (1d / 32d) * Filter3Weights[fti][d];
+                                }
                             }
                         }
+                        //Utilities.PrintResult(Filters3Result[fti], imageIndex, 3, fti);
                     }
-                    Utilities.PrintResult(Filters3Result[fti], imageIndex, 3, fti);
+
+                    #endregion
+
+                    #endregion
+
+                    #endregion
+
                 }
 
-                #endregion
-
-                #region FC
-
-                #region Forward Propagation
-
-                //Berechne outputs des hidden layers
-                for (int i = 0; i < LAYER_HIDDEN_SIZE; i++)
-                {
-                    double outputSum = 0;
-                    int counter = 0;
-                    for (int d = 0; d < FILTER3_AMOUNT; d++)
-                    {
-                        for (int x = 0; x < Filters3Result[d].GetLength(0); x++)
-                        {
-                            for (int y = 0; y < Filters3Result[d].GetLength(0); y++)
-                            {
-                                outputSum += HiddenWeights[i, counter] * Utilities.Normalize(Filters3Result[d][x, y]);
-                                counter++;
-                            }
-                        }
-                    }
-                    outputSum += HiddenBias[i];
-                    HiddenOutputs[i] = Utilities.Sigmoid(outputSum);
-                }
-
-                //Berechne outputs des output layers
-                for (int i = 0; i < LAYER_OUTPUT_SIZE; i++)
-                {
-                    double outputSum = 0;
-                    for (int j = 0; j < LAYER_OUTPUT_INPUT; j++)
-                    {
-                        outputSum += OutputWeights[i, j] * HiddenOutputs[j];
-                    }
-                    outputSum += OutputBias[i];
-                    OutputOutputs[i] = Utilities.Sigmoid(outputSum);
-                }
-
-                #endregion
-
-                #region Output Calculation
-
-                int biggestIndex = -1;
-                double biggestOutput = -1;
-                for (int i = 0; i < LAYER_OUTPUT_SIZE; i++)
-                {
-                    if (OutputOutputs[i] > biggestOutput)
-                    {
-                        biggestIndex = i;
-                        biggestOutput = OutputOutputs[i];
-                    }
-                }
-
-                Console.WriteLine($"Geraten: {biggestIndex} ({biggestOutput}) Ergebnis: {Labels[imageIndex]}");
-
-                #endregion
-
-                #region Backward Propagation
-
-                #endregion
-
-                #endregion
-
+                GlobalError = errorCount / (double)ImageData.Count();
+                Console.WriteLine($"Fehler: {GlobalError}");
+                Thread.Sleep(1000);
+                iteration++;
             }
         }
     }

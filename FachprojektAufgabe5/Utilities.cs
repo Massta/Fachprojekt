@@ -36,14 +36,14 @@ namespace FachprojektAufgabe5
         public static int[][,] ReadCsv(string csvPath, out int[] labels)
         {
             var lines = File.ReadAllLines(csvPath);
-            var takeLines = lines.OrderBy(l => l.Substring(2100, 3)).Take(100).ToArray();
+            var takeLines = lines;//.OrderBy(l => l.Substring(2100, 3)).Take(100).ToArray();
             int[][,] data = new int[takeLines.Count()][,];
             labels = new int[takeLines.Count()];
             for (int i = 0; i < data.Count(); i++)
             {
                 var line = takeLines[i];
                 var lineData = line.Split(';');
-                labels[i] = lineData[4096] == "cat" ? 0 : 1;
+                labels[i] = lineData[4096] == "0" ? 0 : 1;
                 var lineVector = lineData.Take(4096).Select(d => int.Parse(d)).ToArray();
                 data[i] = ConvertMatrix(lineVector, 64, 64);
             }
@@ -72,7 +72,7 @@ namespace FachprojektAufgabe5
         }
         public static double Sigmoid(double x)
         {
-            double exp_val = Math.Exp(-7 * x);
+            double exp_val = Math.Exp(-1 * x);
             return 1.0 / (1.0 + exp_val);
         }
 
