@@ -22,6 +22,66 @@ namespace FachprojektLibrary
             return Math.Max(0, x);
         }
 
+        public static string PrintVector(double[] vector)
+        {
+            string m = "";
+            for (int j = 0; j < vector.Length; j++)
+            {
+                m += (vector[j] == 0 ? 0 : 1) + ", ";
+            }
+            return m;
+        }
+
+        public static string PrintMatrix(double[,] matrix)
+        {
+            string m = "";
+            for (int i = 0; i < matrix.GetLength(1); i++)
+            {
+                for (int j = 0; j < matrix.GetLength(0); j++)
+                {
+                    m += (matrix[j, i] == 0 ? 0 : 1) + ", ";
+                }
+                m += "\n";
+            }
+            return m;
+        }
+        //public static double[] MatrixVectorMultiplication(double[,] matrix, double[] vector)
+        //{
+        //    int rows = matrix.GetLength(1);
+        //    int columns = matrix.GetLength(0);
+
+        //    double[] result = new double[columns];
+
+        //    for (int row = 0; row < rows; row++)
+        //    {
+        //        double sum = 0;
+        //        for (int column = 0; column < columns; column++)
+        //        {
+        //            sum += matrix[row, column] * vector[column];
+        //        }
+        //        result[row] = sum;
+        //    }
+        //    return result;
+        //}
+        public static double[] MatrixVectorMultiplication(double[,] matrix, double[] vector)
+        {
+            int columns = matrix.GetLength(0); //4096
+            int rows = matrix.GetLength(1); //256
+
+            double[] result = new double[rows];
+
+            for (int row = 0; row < rows; row++)
+            {
+                double sum = 0;
+                for (int column = 0; column < columns; column++)
+                {
+                    sum += matrix[column, row] * vector[column];
+                }
+                result[row] = sum;
+            }
+            return result;
+        }
+
         public static double ReLuDerivative(double x)
         {
             return x < 0 ? 0 : 1;
