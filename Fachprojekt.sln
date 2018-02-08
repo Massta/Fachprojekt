@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackPropagationXor", "BackPropagationXor\BackPropagationXor.csproj", "{855BC27A-A488-4423-8A29-AA9D893ABCFA}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FachprojektAufgabe5", "FachprojektAufgabe5\FachprojektAufgabe5.csproj", "{791E440B-65DD-44FA-B15F-AAE807EE435C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FachprojektLibrary", "FachprojektLibrary\FachprojektLibrary.csproj", "{A6CACF91-8D28-4EFE-BF0A-C40F2128769C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HardcodedNetwork", "HardcodedNetwork\HardcodedNetwork.csproj", "{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -135,6 +137,18 @@ Global
 		{A6CACF91-8D28-4EFE-BF0A-C40F2128769C}.Release|x64.Build.0 = Release|Any CPU
 		{A6CACF91-8D28-4EFE-BF0A-C40F2128769C}.Release|x86.ActiveCfg = Release|Any CPU
 		{A6CACF91-8D28-4EFE-BF0A-C40F2128769C}.Release|x86.Build.0 = Release|Any CPU
+		{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}.Debug|x64.Build.0 = Debug|Any CPU
+		{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}.Debug|x86.Build.0 = Debug|Any CPU
+		{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}.Release|x64.ActiveCfg = Release|Any CPU
+		{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}.Release|x64.Build.0 = Release|Any CPU
+		{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}.Release|x86.ActiveCfg = Release|Any CPU
+		{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
