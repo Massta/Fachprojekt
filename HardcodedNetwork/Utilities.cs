@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace HardcodedNetwork
@@ -7,27 +10,27 @@ namespace HardcodedNetwork
     public class Utilities
     {
         public static Random rnd = new Random();
-        public static void StoreImages(string path, double[][][] images)
-        {
-            for (int i = 0; i < images.Length; i++)
-            {
-                string name = images[i].Any(v => v.Any(x => x == 200)) ? "1" : "0";
-                StoreImage(Path.Combine(path, i + "_" + name + ".bmp"), images[i]);
-            }
-        }
-        public static void StoreImage(string path, double[][] image)
-        {
-            Bitmap bitmap = new Bitmap(image.Length, image.Length);
-            for (int i = 0; i < image.Length; i++)
-            {
-                for (int j = 0; j < image[i].Length; j++)
-                {
-                    Color c = Color.FromArgb((int)image[i][j], (int)image[i][j], (int)image[i][j]);
-                    bitmap.SetPixel(i, j, c);
-                }
-            }
-            bitmap.Save(path);
-        }
+        //public static void StoreImages(string path, double[][][] images)
+        //{
+        //    for (int i = 0; i < images.Length; i++)
+        //    {
+        //        string name = images[i].Any(v => v.Any(x => x == 200)) ? "1" : "0";
+        //        StoreImage(Path.Combine(path, i + "_" + name + ".bmp"), images[i]);
+        //    }
+        //}
+        //public static void StoreImage(string path, double[][] image)
+        //{
+        //    Bitmap bitmap = new Bitmap(image.Length, image.Length);
+        //    for (int i = 0; i < image.Length; i++)
+        //    {
+        //        for (int j = 0; j < image[i].Length; j++)
+        //        {
+        //            Color c = Color.FromArgb((int)image[i][j], (int)image[i][j], (int)image[i][j]);
+        //            bitmap.SetPixel(i, j, c);
+        //        }
+        //    }
+        //    bitmap.Save(path);
+        //}
         public static double[][][] GetImages(int amount)
         {
             double[][][] images = new double[amount][][];
@@ -74,6 +77,11 @@ namespace HardcodedNetwork
                 }
             }
             return image;
+        }
+
+        public static bool HasSquare(double[][] inputData)
+        {
+            return inputData.Any(d => d.Any(x => x >= 200));
         }
 
         public static int GetRandomNumber(int min, int max)
