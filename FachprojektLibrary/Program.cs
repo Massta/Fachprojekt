@@ -8,22 +8,23 @@ namespace FachprojektLibrary
 {
     class Program
     {
-        public const int LAYER_SIZE_HIDDEN = 64;
-        public const int LAYER_SIZE_OUTPUT = 10;
+        public const int LAYER_SIZE_HIDDEN = 50;
+        public const int LAYER_SIZE_OUTPUT = 2;
         public const double LEARN_RATE = 0.1;
-        public const double MAXIMUM_ERROR_PERCENTAGE = 0.04;
+        public const double MAXIMUM_ERROR_PERCENTAGE = 0.004;
 
-        public const int INPUT_DATA_WIDTH = 784;
+        public const int INPUT_DATA_WIDTH = 64;
         static void Main(string[] args)
         {
-            ConvolutionalLayer c1 = new ConvolutionalLayer(4, 64, 1);
-            ConvolutionalLayer c2 = new ConvolutionalLayer(4, 16, 4);
-            ConvolutionalLayer c3 = new ConvolutionalLayer(4, 4, 16);
+            //ConvolutionalLayer c1 = new ConvolutionalLayer(4, 64, 1);
+            //ConvolutionalLayer c2 = new ConvolutionalLayer(4, 16, 4);
+            //ConvolutionalLayer c3 = new ConvolutionalLayer(4, 4, 16);
             FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(LAYER_SIZE_HIDDEN, INPUT_DATA_WIDTH, false, LEARN_RATE);
             FullyConnectedLayer outputLayer = new FullyConnectedLayer(LAYER_SIZE_OUTPUT, LAYER_SIZE_HIDDEN, false, LEARN_RATE);
-            Network network = new Network(c1, c2, c3, hiddenLayer, outputLayer);
+            Network network = new Network(hiddenLayer, outputLayer);
             //Number[] trainingNumbers = Utilities.ReadCsv(@"D:\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST\mnist_train.csv");
-            Number[] trainingNumbers = Utilities.ReadKaggleCsv(@"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale\Train.csv");
+            //Number[] trainingNumbers = Utilities.ReadKaggleCsv(@"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale\Train.csv");
+            Number[] trainingNumbers = Utilities.GetImages(10000);
             Train(network, trainingNumbers);
 
             string netName = Utilities.GenerateNetworkName(network);
@@ -31,8 +32,8 @@ namespace FachprojektLibrary
             //Utilities.StoreNetwork(network, $@"C:\Users\Julius Jacobsohn\Documents\Visual Studio 2017\Projects\MNIST_Convolutional\MNIST_Convolutional\resource\{netName}.json");
             //TODO
 
-            Number[] testNumbers = Utilities.ReadCsv(@"D:\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST\mnist_test.csv");
-            Test(network, testNumbers);
+            //Number[] testNumbers = Utilities.ReadCsv(@"D:\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST\mnist_test.csv");
+            //Test(network, testNumbers);
         }
 
         public static void Train(Network network, Number[] numbers)
