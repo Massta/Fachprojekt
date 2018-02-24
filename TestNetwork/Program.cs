@@ -13,40 +13,40 @@ namespace TestNetwork
         static double bias;
         static void Main(string[] args)
         {
-            var inputs = GenerateWeights(10000, 0, 1);
-            var data = inputs.Select(i => new { Data = i, Label = i > 0.5 });
+            var inputs = GenerateWeights(10000, -1, 1);
+            var data = inputs.Select(i => new { Data = i, Label = i > 0 });
             weight = GenerateWeights(1, -1, 1)[0];
             double errorRate = 1;
-            while(errorRate > 0.001)
+            while (errorRate > 0.001)
             {
                 double errorCount = 0;
-                for(int i = 0; i < data.Count(); i++)
+                for (int i = 0; i < data.Count(); i++)
                 {
                     var currentData = data.ElementAt(i);
-                    var neuronResult = Sigmoid((weight*currentData.Data) + bias);
-                    
-                    if(neuronResult > 0.5 == currentData.Label)
+                    var neuronResult = Sigmoid((weight * currentData.Data) + bias);
+                    var wantedResult = (currentData.Label ? 1 : 0);
+
+
+                    if (neuronResult > 0.5 == currentData.Label)
                     {
                         //Guessed correctly
-                        Console.WriteLine("yay");
+                        Console.ForegroundColor = ConsoleColor.Green;
                     }
                     else
                     {
                         //Guessed incorrectly
-                        Console.WriteLine("noo");
+                        Console.ForegroundColor = ConsoleColor.Red;
                         errorCount++;
                     }
-                    Console.WriteLine(errorRate); 
-                    if(i != 0)
-                    {
-                        errorRate = errorCount / i;
-                    }
-                    var error = Math.Pow(neuronResult - (currentData.Label ? 1 : 0), 2);
-                    var az = SigmoidDerivative(/*(weight * currentData.Data) + bias*/neuronResult);
-                    var ca = 2 * (neuronResult - (currentData.Label ? 1 : 0));
-                    var zw = currentData.Data;
-                    var anpassung = zw * az * error;
-                    weight += 0.1 * anpassung;
+                    errorRate = errorCount / (i+1);
+                    Console.WriteLine($@"[{i}/{data.Count()}] Guess: {neuronResult} Wanted: {wantedResult} Errorrate: {errorRate}");
+                    var error = Math.Pow(neuronResult - wantedResult, 2);
+                    var az = SigmoidDerivative(neuronResult);
+                    var ca = (wantedResult-neuronResult);
+                    var zw = neuronResult;
+                    var anpassung = zw * az * ca;
+                    weight -= 0.01 * anpassung;
+                    //bias -= 0.01 * az * zw;
                 }
             }
         }
