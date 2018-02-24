@@ -107,7 +107,7 @@ namespace FachprojektLibrary
             for (int i = 0; i < filterSize; i++)
             {
                 for (int j = 0; j < filterSize; j++)
-                {
+                {randomn
                     lock (syncLock)
                     {
                         filter[i, j] = (random.NextDouble() * (max - min)) + min;
