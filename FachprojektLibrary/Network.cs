@@ -26,7 +26,7 @@
             {
                 double y = i == label ? 1 : 0;
                 double x = outputs[i] > 0.5 ? 1 : 0;//i == guess ? 1 : 0;
-                topError[i] = y-x;
+                topError[i] = y - x;
             }
             topLayer.AdjustWeights(topError);
             for (int i = _layers.Length - 2; i >= 0; i--)
@@ -34,12 +34,36 @@
                 var currentLayer = _layers[i];
                 var currentTopLayer = _layers[i + 1];
 
-                double[] currentError = new double[currentLayer.NeuronAmount];
-                for (int e = 0; e < currentLayer.NeuronAmount; e++)
+                if (typeof(FullyConnectedLayer) == currentLayer.GetType()
+                    && typeof(FullyConnectedLayer) == currentTopLayer.GetType())
                 {
-                    currentError[e] = currentTopLayer.GetWeightErrorSum(e);
+                    double[] currentError = new double[currentLayer.NeuronAmount];
+                    for (int e = 0; e < currentLayer.NeuronAmount; e++)
+                    {
+                        currentError[e] = currentTopLayer.GetWeightErrorSum(e);
+                    }
+                    currentLayer.AdjustWeights(currentError);
                 }
-                currentLayer.AdjustWeights(currentError);
+                else if (typeof(ConvolutionalLayer) == currentLayer.GetType()
+                   && typeof(FullyConnectedLayer) == currentTopLayer.GetType())
+                {
+                    double[] currentError = new double[currentLayer.NeuronAmount];
+                    for (int e = 0; e < currentLayer.NeuronAmount; e++)
+                    {
+                        currentError[e] = currentTopLayer.GetWeightErrorSum(e);
+                    }
+                    currentLayer.AdjustWeights(currentError);
+                }
+                else if (typeof(ConvolutionalLayer) == currentLayer.GetType()
+                   && typeof(ConvolutionalLayer) == currentTopLayer.GetType())
+                {
+                    //AdjustFilterWeights
+                }
+                else
+                {
+                    throw new System.Exception("Network has wrong order");
+                }
+
             }
         }
     }
