@@ -88,5 +88,10 @@ namespace HardcodedNetwork
         {
             return rnd.Next(min, max);
         }
+
+        public static double GetRandomDouble(double min, double max)
+        {
+            return min + (max - min) * rnd.NextDouble();
+        }
     }
 }

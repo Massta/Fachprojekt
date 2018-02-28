@@ -5,8 +5,8 @@ namespace HardcodedNetwork
 {
     public class Program
     {
-        public const double LEARN_RATE = 1;
-        public const double ERROR_MIN = 0.1;
+        public const double LEARN_RATE = 0.0001;
+        public const double ERROR_MIN = 0.01;
         public static double[][] InputData = new double[][]{
             new double[]{ 10,10,0,20,30,20,30,10},
             new double[]{ 10,30,200, 200, 200, 200, 10,20},
@@ -18,13 +18,13 @@ namespace HardcodedNetwork
             new double[]{ 20,30,0,20,0,0,20,0},
         };
         public static double[][] Filter1Level1 = new double[][] {
-            new double[]{-0.2,0.1},
-            new double[]{0.3,0},
+            new double[]{Utilities.GetRandomDouble(-0.1,1),Utilities.GetRandomDouble(-0.1,1)},
+            new double[]{ Utilities.GetRandomDouble(-0.1, 1), Utilities.GetRandomDouble(-0.1,1)},
         };
 
         public static double[][] Filter2Level1 = new double[][] {
-            new double[]{0.2,-0.3},
-            new double[]{0,0.4},
+            new double[]{ Utilities.GetRandomDouble(-0.1, 1), Utilities.GetRandomDouble(-0.1,1)},
+            new double[]{ Utilities.GetRandomDouble(-0.1, 1), Utilities.GetRandomDouble(-0.1,1)},
         };
 
         public static double[][] Filter1Level1Result;
@@ -34,22 +34,22 @@ namespace HardcodedNetwork
         public static double[][] Pooling2Level1Result;
 
         public static double[][] Filter1Level2 = new double[][] {
-            new double[]{0,0.1},
-            new double[]{-0.2,0},
+            new double[]{ Utilities.GetRandomDouble(-0.1, 1), Utilities.GetRandomDouble(-0.1,1)},
+            new double[]{ Utilities.GetRandomDouble(-0.1, 1), Utilities.GetRandomDouble(-0.1,1)},
         };
 
         public static double[][] Filter2Level2 = new double[][] {
-            new double[]{0.1,0.2},
-            new double[]{0.3,0.4},
+            new double[]{ Utilities.GetRandomDouble(-0.1, 1), Utilities.GetRandomDouble(-0.1,1)},
+            new double[]{ Utilities.GetRandomDouble(-0.1, 1), Utilities.GetRandomDouble(-0.1,1)},
         };
         public static double[][] Filter3Level2 = new double[][] {
-            new double[]{0,0.2},
-            new double[]{-0.3,0.1},
+            new double[]{ Utilities.GetRandomDouble(-0.1, 1), Utilities.GetRandomDouble(-0.1,1)},
+            new double[]{ Utilities.GetRandomDouble(-0.1, 1), Utilities.GetRandomDouble(-0.1,1)},
         };
 
         public static double[][] Filter4Level2 = new double[][] {
-            new double[]{-0.2,0.2},
-            new double[]{0,0},
+            new double[]{ Utilities.GetRandomDouble(-0.1, 1), Utilities.GetRandomDouble(-0.1,1)},
+            new double[]{ Utilities.GetRandomDouble(-0.1, 1), Utilities.GetRandomDouble(-0.1,1)},
         };
 
         public static double Filter1Level2Result;
@@ -57,20 +57,20 @@ namespace HardcodedNetwork
         public static double Filter3Level2Result;
         public static double Filter4Level2Result;
 
-        public static double[] Neuron1Level3 = new double[] { 0.1, -0.2, -0.1, 0, 0 };
-        public static double[] Neuron2Level3 = new double[] { 0, 0.3, 0.4, -0.5, 0 };
+        public static double[] Neuron1Level3 = new double[] { Utilities.GetRandomDouble(-1, 1), Utilities.GetRandomDouble(-1, 1), Utilities.GetRandomDouble(-1, 1), Utilities.GetRandomDouble(-1, 1), 0 };
+        public static double[] Neuron2Level3 = new double[] { Utilities.GetRandomDouble(-1, 1), Utilities.GetRandomDouble(-1, 1), Utilities.GetRandomDouble(-1, 1), Utilities.GetRandomDouble(-1, 1), 0 };
 
         public static double Neuron1Level3Output;
         public static double Neuron2Level3Output;
 
-        public static double[] Neuron1Level4 = new double[] { 0.1, -0.1, 0 };
+        public static double[] Neuron1Level4 = new double[] { Utilities.GetRandomDouble(-1, 1), Utilities.GetRandomDouble(-1, 1), 0 };
 
         public static double Neuron1Level4Output;
 
 
         static void Main(string[] args)
         {
-            var images = Utilities.GetImages(1000);
+            var images = Utilities.GetImages(1000000);
             double errorRate = 1;
             double wronglyGuessed = 0;
             int epoch = 0;
@@ -164,10 +164,10 @@ namespace HardcodedNetwork
 
                     double[] fullyConnectInput = new double[]
                     {
-                Filter1Level2Result,
-                Filter2Level2Result,
-                Filter3Level2Result,
-                Filter4Level2Result
+                        Filter1Level2Result/255,
+                        Filter2Level2Result/255,
+                        Filter3Level2Result/255,
+                        Filter4Level2Result/255
                     };
 
                     //Fully Connected Level 3
@@ -185,8 +185,8 @@ namespace HardcodedNetwork
 
                     double[] fullyConnectInput2 = new double[]
                     {
-                Neuron1Level3Output,
-                Neuron2Level3Output
+                        Neuron1Level3Output,
+                        Neuron2Level3Output
                     };
 
                     //Fully Connected Level 4
@@ -209,7 +209,7 @@ namespace HardcodedNetwork
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
                     }
-                        errorRate = wronglyGuessed / (double)(currentImageIndex+1);
+                    errorRate = wronglyGuessed / (double)(currentImageIndex + 1);
                     Console.WriteLine($"[{currentImageIndex}/{images.Length}] Wanted: {label} Output: {Neuron1Level4Output > 0.5} ({Neuron1Level4Output.ToString("n2")} Errorrate: {errorRate}");
                     Console.ForegroundColor = ConsoleColor.White;
 
@@ -221,9 +221,9 @@ namespace HardcodedNetwork
                     double delta1Level4 = -(wantedResult - Neuron1Level4Output) * SigmoidDerivative(Neuron1Level4Output);
                     double[] gradientsLevel4 = new double[]
                     {
-                delta1Level4 * fullyConnectInput2[0],
-                delta1Level4 * fullyConnectInput2[1],
-                delta1Level4 * 1,
+                        delta1Level4 * fullyConnectInput2[0],
+                        delta1Level4 * fullyConnectInput2[1],
+                        delta1Level4 * 1,
                     };
                     for (int i = 0; i < Neuron1Level4.Length; i++)
                     {
@@ -235,22 +235,22 @@ namespace HardcodedNetwork
                     double delta2Level3 = (delta1Level4 * Neuron1Level4[1]) * SigmoidDerivative(Neuron2Level3Output);
                     double[][] gradientsLevel3 = new double[][]
                     {
-                new double[]
-                {
-                    delta1Level3 * Pooling1Level1Result[0][0],
-                    delta1Level3 * fullyConnectInput[1],
-                    delta1Level3 * fullyConnectInput[2],
-                    delta1Level3 * fullyConnectInput[3],
-                    delta1Level3 * 1
-                },
-                new double[]
-                {
-                    delta2Level3 * fullyConnectInput[0],
-                    delta2Level3 * fullyConnectInput[1],
-                    delta2Level3 * fullyConnectInput[2],
-                    delta2Level3 * fullyConnectInput[3],
-                    delta2Level3 * 1
-                },
+                        new double[]
+                        {
+                            delta1Level3 * fullyConnectInput[0],
+                            delta1Level3 * fullyConnectInput[1],
+                            delta1Level3 * fullyConnectInput[2],
+                            delta1Level3 * fullyConnectInput[3],
+                            delta1Level3 * 1
+                        },
+                        new double[]
+                        {
+                            delta2Level3 * fullyConnectInput[0],
+                            delta2Level3 * fullyConnectInput[1],
+                            delta2Level3 * fullyConnectInput[2],
+                            delta2Level3 * fullyConnectInput[3],
+                            delta2Level3 * 1
+                        }
                     };
                     for (int i = 0; i < Neuron1Level3.Length; i++)
                     {
@@ -258,104 +258,117 @@ namespace HardcodedNetwork
                         Neuron2Level3[i] -= LEARN_RATE * gradientsLevel3[1][i];
                     }
 
+                    //Deltas für Davids kleine Lieblinge
+                    double deltaConvolutionalResult1 = delta1Level3 * Neuron1Level3[0]
+                        + delta2Level3 * Neuron2Level3[0];
+                    double deltaConvolutionalResult2 = delta1Level3 * Neuron1Level3[1]
+                        + delta2Level3 * Neuron2Level3[1];
+                    double deltaConvolutionalResult3 = delta1Level3 * Neuron1Level3[2]
+                        + delta2Level3 * Neuron2Level3[2];
+                    double deltaConvolutionalResult4 = delta1Level3 * Neuron1Level3[3]
+                        + delta2Level3 * Neuron2Level3[3];
+
                     //Level 2 Convolutional
-                    double delta1Level2 = (delta1Level3 * Neuron1Level3[0] + delta2Level3 * Neuron2Level3[0])
-                        * ReLUDerivative(Filter1Level2Result);
-                    double delta2Level2 = (delta1Level3 * Neuron1Level3[1] + delta2Level3 * Neuron2Level3[1])
-                        * ReLUDerivative(Filter2Level2Result);
-                    double delta3Level2 = (delta1Level3 * Neuron1Level3[2] + delta2Level3 * Neuron2Level3[2])
-                        * ReLUDerivative(Filter3Level2Result);
-                    double delta4Level2 = (delta1Level3 * Neuron1Level3[3] + delta2Level3 * Neuron2Level3[3])
-                        * ReLUDerivative(Filter4Level2Result);
-
-                    double[][] gradientsLevel2 = new double[][]
+                    double[][] deltaConvolutional1Level2 = new double[2][];
+                    double[][] deltaConvolutional2Level2 = new double[2][];
+                    double[][] deltaConvolutional3Level2 = new double[2][];
+                    double[][] deltaConvolutional4Level2 = new double[2][];
+                    for (int i = 0; i < 2; i++)
                     {
-                new double[]
-                {
-                    delta1Level2 * Pooling1Level1Result[0][0],
-                    delta1Level2 * Pooling1Level1Result[1][0],
-                    delta1Level2 * Pooling1Level1Result[0][1],
-                    delta1Level2 * Pooling1Level1Result[1][1],
-                },
-                new double[]
-                {
-                    delta2Level2 * Pooling1Level1Result[0][0],
-                    delta2Level2 * Pooling1Level1Result[1][0],
-                    delta2Level2 * Pooling1Level1Result[0][1],
-                    delta2Level2 * Pooling1Level1Result[1][1],
-                },
-                new double[]
-                {
-                    delta3Level2 * Pooling2Level1Result[0][0],
-                    delta3Level2 * Pooling2Level1Result[1][0],
-                    delta3Level2 * Pooling2Level1Result[0][1],
-                    delta3Level2 * Pooling2Level1Result[1][1],
-                },
-                new double[]
-                {
-                    delta4Level2 * Pooling2Level1Result[0][0],
-                    delta4Level2 * Pooling2Level1Result[1][0],
-                    delta4Level2 * Pooling2Level1Result[0][1],
-                    delta4Level2 * Pooling2Level1Result[1][1],
-                }
-                    };
-                    //TODO transponieren
-                    Filter1Level2[0][0] -= LEARN_RATE * gradientsLevel2[0][0];
-                    Filter1Level2[1][0] -= LEARN_RATE * gradientsLevel2[0][1];
-                    Filter1Level2[0][1] -= LEARN_RATE * gradientsLevel2[0][2];
-                    Filter1Level2[1][1] -= LEARN_RATE * gradientsLevel2[0][3];
+                        deltaConvolutional1Level2[i] = new double[2];
+                        deltaConvolutional2Level2[i] = new double[2];
+                        deltaConvolutional3Level2[i] = new double[2];
+                        deltaConvolutional4Level2[i] = new double[2];
+                        for (int j = 0; j < 2; j++)
+                        {
+                            deltaConvolutional1Level2[i][j] = Filter1Level2[i][j] * deltaConvolutionalResult1;
+                            deltaConvolutional2Level2[i][j] = Filter2Level2[i][j] * deltaConvolutionalResult2;
+                            deltaConvolutional3Level2[i][j] = Filter3Level2[i][j] * deltaConvolutionalResult3;
+                            deltaConvolutional4Level2[i][j] = Filter4Level2[i][j] * deltaConvolutionalResult4;
+                        }
+                    }
 
-                    Filter2Level2[0][0] -= LEARN_RATE * gradientsLevel2[1][0];
-                    Filter2Level2[1][0] -= LEARN_RATE * gradientsLevel2[1][1];
-                    Filter2Level2[0][1] -= LEARN_RATE * gradientsLevel2[1][2];
-                    Filter2Level2[1][1] -= LEARN_RATE * gradientsLevel2[1][3];
+                    double[][] deltaFilter1Level2 = new double[2][];
+                    double[][] deltaFilter2Level2 = new double[2][];
+                    double[][] deltaFilter3Level2 = new double[2][];
+                    double[][] deltaFilter4Level2 = new double[2][];
+                    for (int i = 0; i < 2; i++)
+                    {
+                        deltaFilter1Level2[i] = new double[2];
+                        deltaFilter2Level2[i] = new double[2];
+                        deltaFilter3Level2[i] = new double[2];
+                        deltaFilter4Level2[i] = new double[2];
+                        for (int j = 0; j < 2; j++)
+                        {
+                            deltaFilter1Level2[i][j] = Pooling1Level1Result[0][0] * deltaConvolutionalResult1;
+                            deltaFilter2Level2[i][j] = Pooling1Level1Result[0][0] * deltaConvolutionalResult2;
+                            deltaFilter3Level2[i][j] = Pooling2Level1Result[0][0] * deltaConvolutionalResult3;
+                            deltaFilter4Level2[i][j] = Pooling2Level1Result[0][0] * deltaConvolutionalResult4;
+                            Filter1Level2[i][j] -= LEARN_RATE * deltaFilter1Level2[i][j];
+                            Filter2Level2[i][j] -= LEARN_RATE * deltaFilter2Level2[i][j];
+                            Filter3Level2[i][j] -= LEARN_RATE * deltaFilter3Level2[i][j];
+                            Filter4Level2[i][j] -= LEARN_RATE * deltaFilter4Level2[i][j];
+                        }
+                    }
 
-                    Filter3Level2[0][0] -= LEARN_RATE * gradientsLevel2[2][0];
-                    Filter3Level2[1][0] -= LEARN_RATE * gradientsLevel2[2][1];
-                    Filter3Level2[0][1] -= LEARN_RATE * gradientsLevel2[2][2];
-                    Filter3Level2[1][1] -= LEARN_RATE * gradientsLevel2[2][3];
+                    //Level 1 Convolutional - Pooling
+                    double[][] deltaPooling1Level1 = new double[4][];
+                    double[][] deltaPooling2Level1 = new double[4][];
+                    for (int i = 0; i < 4; i++)
+                    {
+                        deltaPooling1Level1[i] = new double[4];
+                        deltaPooling2Level1[i] = new double[4];
+                    }
 
-                    Filter4Level2[0][0] -= LEARN_RATE * gradientsLevel2[3][0];
-                    Filter4Level2[1][0] -= LEARN_RATE * gradientsLevel2[3][1];
-                    Filter4Level2[0][1] -= LEARN_RATE * gradientsLevel2[3][2];
-                    Filter4Level2[1][1] -= LEARN_RATE * gradientsLevel2[3][3];
+                    for (int i = 0; i < 2; i++)
+                    {
+                        for (int j = 0; j < 2; j++)
+                        {
+                            for (int k = 0; k < 2; k++)
+                            {
+                                for (int l = 0; l < 2; l++)
+                                {
+                                    deltaPooling1Level1[i * 2 + k][j * 2 + l] =
+                                      deltaConvolutional1Level2[i][j] + deltaConvolutional2Level2[i][j];
+                                    deltaPooling2Level1[i * 2 + k][j * 2 + l] =
+                                      deltaConvolutional3Level2[i][j] + deltaConvolutional4Level2[i][j];
+                                }
+                            }
+                        }
+                    }
 
                     //Level 1 Convolutional
-                    double delta1Level1 = (delta1Level2 * Filter1Level2[0][0]
-                        + delta2Level2 * Filter2Level2[0][0]
-                        + delta3Level2 * Filter1Level2[0][0]
-                        + delta4Level2 * Filter2Level2[0][0])
-                        * ReLUDerivative(/*Filter1Level1Result*/1);
-                    double delta2Level1 = (delta1Level3 * Neuron1Level3[1] + delta2Level3 * Neuron2Level3[1])
-                        * ReLUDerivative(Filter2Level2Result);
 
-                    double[][] gradientsLevel1 = new double[][]
+                    double[][] deltaFilter1Level1 = new double[2][];
+                    double[][] deltaFilter2Level1 = new double[2][];
+                    for (int i = 0; i < 2; i++)
                     {
-                        new double[]
+                        deltaFilter1Level1[i] = new double[2];
+                        deltaFilter2Level1[i] = new double[2];
+                    }
+                    for (int i = 0; i < 4; i++)
+                    {
+                        for (int j = 0; j < 4; j++)
                         {
-                            delta1Level2 * Pooling1Level1Result[0][0],
-                            delta1Level2 * Pooling1Level1Result[1][0],
-                            delta1Level2 * Pooling1Level1Result[0][1],
-                            delta1Level2 * Pooling1Level1Result[1][1],
-                        },
-                        new double[]
-                        {
-                            delta3Level2 * Pooling2Level1Result[0][0],
-                            delta3Level2 * Pooling2Level1Result[1][0],
-                            delta3Level2 * Pooling2Level1Result[0][1],
-                            delta3Level2 * Pooling2Level1Result[1][1],
+                            for (int k = 0; k < 2; k++)
+                            {
+                                for (int l = 0; l < 2; l++)
+                                {
+                                    deltaFilter1Level1[k][l] += deltaPooling1Level1[i][j] * inputData[i * 2 + k][j * 2 + l];
+                                    deltaFilter2Level1[k][l] += deltaPooling2Level1[i][j] * inputData[i * 2 + k][j * 2 + l];
+                                }
+                            }
                         }
-                    };
+                    }
 
-                    Filter1Level1[0][0] -= LEARN_RATE * gradientsLevel1[0][0];
-                    Filter1Level1[1][0] -= LEARN_RATE * gradientsLevel1[0][1];
-                    Filter1Level1[0][1] -= LEARN_RATE * gradientsLevel1[0][2];
-                    Filter1Level1[1][1] -= LEARN_RATE * gradientsLevel1[0][3];
-
-                    Filter2Level1[0][0] -= LEARN_RATE * gradientsLevel1[1][0];
-                    Filter2Level1[1][0] -= LEARN_RATE * gradientsLevel1[1][1];
-                    Filter2Level1[0][1] -= LEARN_RATE * gradientsLevel1[1][2];
-                    Filter2Level1[1][1] -= LEARN_RATE * gradientsLevel1[1][3];
+                    for (int i = 0; i < 2; i++)
+                    {
+                        for (int j = 0; j < 2; j++)
+                        {
+                            Filter1Level1[i][j] -= LEARN_RATE * deltaFilter1Level1[i][j];
+                            Filter2Level1[i][j] -= LEARN_RATE * deltaFilter2Level1[i][j];
+                        }
+                    }
 
                     #endregion
                 }
