@@ -8,23 +8,24 @@ namespace FachprojektLibrary
 {
     class Program
     {
-        public const int LAYER_SIZE_HIDDEN = 50;
-        public const int LAYER_SIZE_OUTPUT = 2;
-        public const double LEARN_RATE = 0.1;
-        public const double MAXIMUM_ERROR_PERCENTAGE = 0.004;
+        public const int LAYER_SIZE_HIDDEN = 64;
+        public const int LAYER_SIZE_OUTPUT = 1;
+        public const double LEARN_RATE = 0.01;
+        public const double MAXIMUM_ERROR_PERCENTAGE = 0.01;
 
         public const int INPUT_DATA_WIDTH = 64;
         static void Main(string[] args)
         {
-            //ConvolutionalLayer c1 = new ConvolutionalLayer(4, 64, 1);
-            //ConvolutionalLayer c2 = new ConvolutionalLayer(4, 16, 4);
-            //ConvolutionalLayer c3 = new ConvolutionalLayer(4, 4, 16);
+            ConvolutionalLayer c1 = new ConvolutionalLayer(4, 8, 1);
+            ConvolutionalLayer c2 = new ConvolutionalLayer(4, 4, 4);
+            ConvolutionalLayer c3 = new ConvolutionalLayer(4, 2, 16);
             FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(LAYER_SIZE_HIDDEN, INPUT_DATA_WIDTH, false, LEARN_RATE);
             FullyConnectedLayer outputLayer = new FullyConnectedLayer(LAYER_SIZE_OUTPUT, LAYER_SIZE_HIDDEN, false, LEARN_RATE);
-            Network network = new Network(hiddenLayer, outputLayer);
+            Network network = new Network(c1, c2, c3, hiddenLayer, outputLayer);
             //Number[] trainingNumbers = Utilities.ReadCsv(@"D:\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST\mnist_train.csv");
             //Number[] trainingNumbers = Utilities.ReadKaggleCsv(@"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale\Train.csv");
-            Number[] trainingNumbers = Utilities.GetImages(10000);
+            Number[] trainingNumbers = Utilities.GetImages(1000);
+            Console.WriteLine(trainingNumbers.Count(n => n.Label == 1.0));
             Train(network, trainingNumbers);
 
             string netName = Utilities.GenerateNetworkName(network);
@@ -47,38 +48,25 @@ namespace FachprojektLibrary
                 double totalNumbers = numbers.Length;
                 foreach (var number in numbers)
                 {
-                    var outputs = network.GetOutputs(number.NormalizedData);
-                    double biggestIndex = -1;
-                    double biggestNumber = 0;
-                    for (int i = 0; i < outputs.Length; i++)
-                    {
-                        if (outputs[i] > biggestNumber)
-                        {
-                            biggestNumber = outputs[i];
-                            biggestIndex = i;
-                        }
-                    }
-                    number.Guess = biggestIndex;
-                    if (number.Label != number.Guess)
+                    var outputs = network.GetOutputs(number.Data);
+                    number.Guess = outputs[0];
+                    if (number.Label != number.LabelGuess)
                     {
                         errorCount++;
                         Console.ForegroundColor = ConsoleColor.Red;
-                        if (currentNumber != 0)
-                        {
-                            errorPercentage = errorCount / currentNumber;
-                        }
+                        errorPercentage = errorCount / (currentNumber + 1);
                     }
                     if (currentNumber % 100 == 0)
                     {
                         double errorPercentageLast100 = 0;
                         if (currentNumber > 100 && currentNumber < numbers.Length - 100)
                         {
-                            errorPercentageLast100 = numbers.Skip(currentNumber - 100).Take(100).Count(n => n.Label != n.Guess);
+                            errorPercentageLast100 = numbers.Skip(currentNumber - 100).Take(100).Count(n => n.Label != n.LabelGuess);
                         }
-                        Console.WriteLine($"[{epoch}:{currentNumber}/{totalNumbers}] Gegeben: {number.Label} Geraten: {biggestIndex} ({biggestNumber}) Fehlerprozentsatz: {Math.Round(errorPercentage * 100)}% Fehlerprozentsatz (letzte 100): {Math.Round(errorPercentageLast100)}%");
+                        Console.WriteLine($"[{epoch}:{currentNumber}/{totalNumbers}] Gegeben: {number.Label} Geraten: {number.LabelGuess} ({number.Guess.ToString("n2")}) Fehlerprozentsatz: {Math.Round(errorPercentage * 100)}% Fehlerprozentsatz (letzte 100): {Math.Round(errorPercentageLast100)}%");
                     }
                     Console.ForegroundColor = ConsoleColor.White;
-                    network.AdjustWeights(number.Label, biggestIndex, outputs);
+                    network.AdjustWeights(new double[] { number.Label }, outputs);
                     currentNumber++;
                 }
                 errorCount = 0;

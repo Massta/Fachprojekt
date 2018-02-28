@@ -42,5 +42,10 @@ namespace FachprojektLibrary
         {
             return _neurons.Sum(n => n.GetWeightError(i));
         }
+
+        public void AdjustFilterWeights(double[][][] topDeltas)
+        {
+            throw new System.NotImplementedException("Don't use this in a fc layer");
+        }
     }
 }

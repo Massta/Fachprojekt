@@ -70,7 +70,7 @@ namespace HardcodedNetwork
 
         static void Main(string[] args)
         {
-            var images = Utilities.GetImages(1000000);
+            var images = Utilities.GetImages(10000);
             double errorRate = 1;
             double wronglyGuessed = 0;
             int epoch = 0;
@@ -300,10 +300,10 @@ namespace HardcodedNetwork
                         deltaFilter4Level2[i] = new double[2];
                         for (int j = 0; j < 2; j++)
                         {
-                            deltaFilter1Level2[i][j] = Pooling1Level1Result[0][0] * deltaConvolutionalResult1;
-                            deltaFilter2Level2[i][j] = Pooling1Level1Result[0][0] * deltaConvolutionalResult2;
-                            deltaFilter3Level2[i][j] = Pooling2Level1Result[0][0] * deltaConvolutionalResult3;
-                            deltaFilter4Level2[i][j] = Pooling2Level1Result[0][0] * deltaConvolutionalResult4;
+                            deltaFilter1Level2[i][j] = Pooling1Level1Result[i][j] * deltaConvolutionalResult1; //pooling war vorher [0][0]!
+                            deltaFilter2Level2[i][j] = Pooling1Level1Result[i][j] * deltaConvolutionalResult2;
+                            deltaFilter3Level2[i][j] = Pooling2Level1Result[i][j] * deltaConvolutionalResult3;
+                            deltaFilter4Level2[i][j] = Pooling2Level1Result[i][j] * deltaConvolutionalResult4;
                             Filter1Level2[i][j] -= LEARN_RATE * deltaFilter1Level2[i][j];
                             Filter2Level2[i][j] -= LEARN_RATE * deltaFilter2Level2[i][j];
                             Filter3Level2[i][j] -= LEARN_RATE * deltaFilter3Level2[i][j];

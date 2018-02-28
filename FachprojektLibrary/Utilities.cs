@@ -108,7 +108,7 @@ namespace FachprojektLibrary
             for (int i = 0; i < filterSize; i++)
             {
                 for (int j = 0; j < filterSize; j++)
-                {randomn
+                {
                     lock (syncLock)
                     {
                         filter[i, j] = (random.NextDouble() * (max - min)) + min;
@@ -129,6 +129,25 @@ namespace FachprojektLibrary
             networkName = networkName.TrimEnd(',', ' ');
             networkName += ")";
             return networkName;
+        }
+
+        public static double[][][] To3DArray(double[] inputs, int x, int y, int z)
+        {
+            var newArray = new double[x][][];
+            for (int i = 0; i < x; i++)
+            {
+                newArray[i] = new double[y][];
+                for (int j = 0; j < y; j++)
+                {
+                    newArray[i][j] = new double[z];
+                    for (int k = 0; k < z; k++)
+                    {
+                        newArray[i][j][k] = inputs[(i * y * z) + (j * z) + k];
+                    }
+                }
+            }
+
+            return newArray;
         }
 
         public static void StoreNetwork(Network network, string path)

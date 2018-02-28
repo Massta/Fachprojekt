@@ -17,16 +17,16 @@
             return oldOutputs;
         }
 
-        public void AdjustWeights(double label, double guess, double[] outputs)
+        public void AdjustWeights(double[] label, double[] guess)
         {
             var topLayer = _layers[_layers.Length - 1];
 
             double[] topError = new double[topLayer.NeuronAmount];
             for (int i = 0; i < topLayer.NeuronAmount; i++)
             {
-                double y = i == label ? 1 : 0;
-                double x = outputs[i] > 0.5 ? 1 : 0;//i == guess ? 1 : 0;
-                topError[i] = y - x;
+                //double y = i == label ? 1 : 0;
+                //double x = outputs[i] > 0.5 ? 1 : 0;//i == guess ? 1 : 0;
+                topError[i] = label[i] - guess[i];
             }
             topLayer.AdjustWeights(topError);
             for (int i = _layers.Length - 2; i >= 0; i--)
@@ -47,8 +47,9 @@
                 else if (typeof(ConvolutionalLayer) == currentLayer.GetType()
                    && typeof(FullyConnectedLayer) == currentTopLayer.GetType())
                 {
-                    double[] currentError = new double[currentLayer.NeuronAmount];
-                    for (int e = 0; e < currentLayer.NeuronAmount; e++)
+                    var imageOutAmount = ((ConvolutionalLayer)currentLayer).ImageAmountOutput;
+                    double[] currentError = new double[imageOutAmount];
+                    for (int e = 0; e < imageOutAmount; e++)
                     {
                         currentError[e] = currentTopLayer.GetWeightErrorSum(e);
                     }
@@ -58,6 +59,7 @@
                    && typeof(ConvolutionalLayer) == currentTopLayer.GetType())
                 {
                     //AdjustFilterWeights
+                    currentLayer.AdjustFilterWeights(((ConvolutionalLayer)currentTopLayer).ImageDeltas);
                 }
                 else
                 {
