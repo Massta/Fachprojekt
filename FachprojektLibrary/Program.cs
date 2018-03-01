@@ -82,7 +82,7 @@ namespace FachprojektLibrary
             double totalNumbers = numbers.Length;
             foreach (var number in numbers)
             {
-                var outputs = network.GetOutputs(number.NormalizedData);
+                var outputs = network.GetOutputs(number.Data);
                 double biggestIndex = -1;
                 double biggestNumber = 0;
                 for (int i = 0; i < outputs.Length; i++)

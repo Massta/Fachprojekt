@@ -160,30 +160,23 @@ namespace FachprojektLibrary
             LastInputs = Utilities.To3DArray(inputs, ImageAmount, InputSize, InputSize);
             int imageIndexSize = inputs.Length / ImageAmount;
             int outputImageSize = (InputSize * InputSize) / (NeuronSize * NeuronSize);
-            double[] filterOutputs = new double[ImageAmount * NeuronAmount * outputImageSize*outputImageSize];
+            int outputImageWidth = InputSize / NeuronSize;
+            double[] filterOutputs = new double[ImageAmount * NeuronAmount * outputImageSize];
             for (int image = 0; image < ImageAmount; image++)
             {
                 var currentInputImage = inputs
                     .Skip(image * imageIndexSize)
                     .Take(imageIndexSize)
                     .ToArray();
-                double[][] currentInputImageMatrix = new double[InputSize][];
-                for (int i = 0; i < InputSize; i++)
-                {
-                    currentInputImageMatrix[i] = new double[InputSize];
-                    for (int j = 0; j < InputSize; j++)
-                    {
-                        currentInputImageMatrix[i][j] = currentInputImage[i * InputSize + j];
-                    }
-                }
+                double[][] currentInputImageMatrix = Utilities.To3DArray(currentInputImage, 1, InputSize, InputSize)[0];
                 for (int filter = 0; filter < NeuronAmount; filter++)
                 {
                     //var currentVector = Utilities.MatrixVectorMultiplication(Filters[filter].WeightMatrix, currentInputImage);
-                    double[] currentVector = new double[outputImageSize * outputImageSize];
-                    double[][] currentMatrix = new double[outputImageSize][];
-                    for (int i = 0; i < outputImageSize; i++)
+                    double[] currentVector = new double[outputImageSize];
+                    double[][] currentMatrix = new double[outputImageWidth][];
+                    for (int i = 0; i < outputImageWidth; i++)
                     {
-                        currentMatrix[i] = new double[outputImageSize];
+                        currentMatrix[i] = new double[outputImageWidth];
                     }
                     var currentFilter = Filters[filter];
                     for (int i = 0; i < currentInputImageMatrix.Length; i += FilterStride)
@@ -199,16 +192,16 @@ namespace FachprojektLibrary
                             }
                         }
                     }
-                    for (int i = 0; i < outputImageSize; i++)
+                    for (int i = 0; i < outputImageWidth; i++)
                     {
-                        for (int j = 0; j < outputImageSize; j++)
+                        for (int j = 0; j < outputImageWidth; j++)
                         {
-                            currentVector[i * outputImageSize + j] = currentMatrix[i][j];
+                            currentVector[i * outputImageWidth + j] = currentMatrix[i][j];
                         }
                     }
                     for (int j = 0; j < currentVector.Length; j++)
                     {
-                        filterOutputs[image * outputImageSize + filter * currentVector.Length + j] = currentVector[j];
+                        filterOutputs[image * outputImageSize * NeuronAmount + filter * currentVector.Length + j] = currentVector[j];
                     }
                 }
             }
