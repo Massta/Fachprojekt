@@ -13,6 +13,7 @@ namespace ImagePreprocessing
 {
     public class Program
     {
+        const string PATH_MNIST = @"C:\Users\Julius Jacobsohn\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST";
         const string PATH_TEST = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Test";
         const string PATH_TRAIN = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train";
         const string PATH_OUTPUT = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Edited";
@@ -21,26 +22,26 @@ namespace ImagePreprocessing
         const string PATH_TRAIN_SMALL_GRAY = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale";
         static void Main(string[] args)
         {
-            var lines = File.ReadAllLines(Path.Combine(PATH_TRAIN_SMALL_GRAY, "Train_num.csv"));
-            var cats = lines.Take(1000).ToArray();
-            var dogs = lines.Skip(12500).Take(1000).ToArray();
-            StringBuilder newCsv = new StringBuilder();
-            int catC = 0;
-            int dogC = 0;
-            for (int j = 0; j < 2000; j++)
-            {
-                if (j % 2 == 0)
-                {
-                    newCsv.AppendLine(cats[catC]);
-                    catC++;
-                }
-                else
-                {
-                    newCsv.AppendLine(dogs[dogC]);
-                    dogC++;
-                }
-            }
-            File.WriteAllText(Path.Combine(PATH_TRAIN_SMALL_GRAY, "Train_num_ordered_small.csv"), newCsv.ToString());
+            ////var lines = File.ReadAllLines(Path.Combine(PATH_TRAIN_SMALL_GRAY, "Train_num.csv"));
+            ////var cats = lines.Take(1000).ToArray();
+            ////var dogs = lines.Skip(12500).Take(1000).ToArray();
+            ////StringBuilder newCsv = new StringBuilder();
+            ////int catC = 0;
+            ////int dogC = 0;
+            ////for (int j = 0; j < 2000; j++)
+            ////{
+            ////    if (j % 2 == 0)
+            ////    {
+            ////        newCsv.AppendLine(cats[catC]);
+            ////        catC++;
+            ////    }
+            ////    else
+            ////    {
+            ////        newCsv.AppendLine(dogs[dogC]);
+            ////        dogC++;
+            ////    }
+            ////}
+            ////File.WriteAllText(Path.Combine(PATH_TRAIN_SMALL_GRAY, "Train_num_ordered_small.csv"), newCsv.ToString());
             //Console.WriteLine("Reading files...");
             //var files = Directory.GetFiles(PATH_TRAIN);
             //Console.WriteLine("Loading images...");

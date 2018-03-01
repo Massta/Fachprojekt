@@ -41,7 +41,7 @@ namespace FachprojektLibrary
             Filters = new Filter[filterAmount];
             for (int i = 0; i < filterAmount; i++)
             {
-                Filters[i] = new Filter(NeuronSize, FilterStride, inputSize, -1, 1);
+                Filters[i] = new Filter(NeuronSize, FilterStride, inputSize, -0.1, 0.1);
             }
         }
 

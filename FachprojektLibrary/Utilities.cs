@@ -220,7 +220,7 @@ namespace FachprojektLibrary
             double[] labels = new double[amount];
             for (int i = 0; i < amount; i++)
             {
-                images[i] = GetDistortedImage(0, 255);
+                images[i] = GetDistortedImage(0, 50);
                 if (GetRandomNumber(0, 2) > 0)
                 {
                     labels[i] = 1.0;

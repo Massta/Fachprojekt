@@ -11,7 +11,7 @@ namespace FachprojektLibrary
         public const int LAYER_SIZE_HIDDEN = 64;
         public const int LAYER_SIZE_OUTPUT = 1;
         public const double LEARN_RATE = 0.01;
-        public const double MAXIMUM_ERROR_PERCENTAGE = 0.01;
+        public const double MAXIMUM_ERROR_PERCENTAGE = 0.05;
 
         public const int INPUT_DATA_WIDTH = 64;
         static void Main(string[] args)
@@ -24,7 +24,7 @@ namespace FachprojektLibrary
             Network network = new Network(c1, c2, c3, hiddenLayer, outputLayer);
             //Number[] trainingNumbers = Utilities.ReadCsv(@"D:\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST\mnist_train.csv");
             //Number[] trainingNumbers = Utilities.ReadKaggleCsv(@"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale\Train.csv");
-            Number[] trainingNumbers = Utilities.GetImages(1000);
+            Number[] trainingNumbers = Utilities.GetImages(100000);
             Console.WriteLine(trainingNumbers.Count(n => n.Label == 1.0));
             Train(network, trainingNumbers);
 
