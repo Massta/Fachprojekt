@@ -13,7 +13,7 @@ namespace ImagePreprocessing
 {
     public class Program
     {
-        const string PATH_MNIST = @"C:\Users\Julius Jacobsohn\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST";
+        const string PATH_MNIST = @"C:\Users\Julius Jacobsohn\OneDrive\Dokumente\MNIST";
         const string PATH_TEST = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Test";
         const string PATH_TRAIN = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train";
         const string PATH_OUTPUT = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Edited";
@@ -22,6 +22,23 @@ namespace ImagePreprocessing
         const string PATH_TRAIN_SMALL_GRAY = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale";
         static void Main(string[] args)
         {
+            var lines = File.ReadAllLines(Path.Combine(PATH_MNIST, "mnist_train.csv"));
+            Console.WriteLine("Read lines");
+            string allLines = "";
+            foreach(var line in lines)
+            {
+                var newLine = line;
+                for(int i = 0; i < 240; i++)
+                {
+                    newLine += ",0";
+                }
+                allLines += newLine + "\n";
+            }
+            Console.WriteLine("Appended");
+            allLines = allLines.TrimEnd();
+            Console.WriteLine("Trimmed");
+            File.AppendAllText(Path.Combine(PATH_MNIST, "mnist_train_appended.csv"),allLines);
+            Console.WriteLine("Saved");
             ////var lines = File.ReadAllLines(Path.Combine(PATH_TRAIN_SMALL_GRAY, "Train_num.csv"));
             ////var cats = lines.Take(1000).ToArray();
             ////var dogs = lines.Skip(12500).Take(1000).ToArray();

@@ -9,35 +9,55 @@ namespace FachprojektLibrary
 {
     class Program
     {
-        public const int LAYER_SIZE_HIDDEN = 64;
+        public const int LAYER_SIZE_HIDDEN = 512;
         public const int LAYER_SIZE_OUTPUT = 1;
-        public const double LEARN_RATE = 0.01;
-        public const double MAXIMUM_ERROR_PERCENTAGE = 0.05;
+        public const double LEARN_RATE = 0.1;
+        public const double MAXIMUM_ERROR_PERCENTAGE = 0.01;
 
-        public const int INPUT_DATA_WIDTH = 64;
+        public const int INPUT_DATA_WIDTH = 512;
         static void Main(string[] args)
         {
-            ConvolutionalLayer c1 = new ConvolutionalLayer(4, 8, 1);
-            ConvolutionalLayer c2 = new ConvolutionalLayer(4, 4, 4);
-            ConvolutionalLayer c3 = new ConvolutionalLayer(4, 2, 16);
+            //Number[] trainingNumbers = Utilities.ReadCsv(@"D:\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST\mnist_train.csv");
+            //Number[] trainingNumbers = Utilities.ReadKaggleCsv(@"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale\Train.csv");
+            ConvolutionalLayer c1 = new ConvolutionalLayer(8, 8, 1, LEARN_RATE);
+            ConvolutionalLayer c2 = new ConvolutionalLayer(8, 4, 8, LEARN_RATE);
+            ConvolutionalLayer c3 = new ConvolutionalLayer(8, 2, 64, LEARN_RATE);
             FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(LAYER_SIZE_HIDDEN, INPUT_DATA_WIDTH, false, LEARN_RATE);
             FullyConnectedLayer outputLayer = new FullyConnectedLayer(LAYER_SIZE_OUTPUT, LAYER_SIZE_HIDDEN, false, LEARN_RATE);
             Network network = new Network(c1, c2, c3, hiddenLayer, outputLayer);
-            //Number[] trainingNumbers = Utilities.ReadCsv(@"D:\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST\mnist_train.csv");
-            //Number[] trainingNumbers = Utilities.ReadKaggleCsv(@"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale\Train.csv");
             Number[] trainingNumbers = Utilities.GetImages(10000);
             Console.WriteLine(trainingNumbers.Count(n => n.Label == 1.0));
             Train(network, trainingNumbers);
             Thread.Sleep(1000);
-            Number[] testNumbers = Utilities.GetImages(100000);
+            Number[] testNumbers = Utilities.GetImages(10000);
             Test(network, testNumbers);
 
-            //string netName = Utilities.GenerateNetworkName(network);
+            //Small Rectangles
+            //ConvolutionalLayer c1 = new ConvolutionalLayer(4, 8, 1, LEARN_RATE);
+            //ConvolutionalLayer c2 = new ConvolutionalLayer(4, 4, 4, LEARN_RATE);
+            //ConvolutionalLayer c3 = new ConvolutionalLayer(4, 2, 16, LEARN_RATE);
+            //FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(LAYER_SIZE_HIDDEN, INPUT_DATA_WIDTH, false, LEARN_RATE);
+            //FullyConnectedLayer outputLayer = new FullyConnectedLayer(LAYER_SIZE_OUTPUT, LAYER_SIZE_HIDDEN, false, LEARN_RATE);
+            //Network network = new Network(c1, c2, c3, hiddenLayer, outputLayer);
+            //Number[] trainingNumbers = Utilities.GetImages(10000);
+            //Console.WriteLine(trainingNumbers.Count(n => n.Label == 1.0));
+            //Train(network, trainingNumbers);
+            //Thread.Sleep(1000);
+            //Number[] testNumbers = Utilities.GetImages(100000);
+            //Test(network, testNumbers);
 
-            //Utilities.StoreNetwork(network, $@"C:\Users\Julius Jacobsohn\Documents\Visual Studio 2017\Projects\MNIST_Convolutional\MNIST_Convolutional\resource\{netName}.json");
-            //TODO
-
-            //Number[] testNumbers = Utilities.ReadCsv(@"D:\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST\mnist_test.csv");
+            //Small Rectangles - 8 Filters
+            //ConvolutionalLayer c1 = new ConvolutionalLayer(8, 8, 1, LEARN_RATE);
+            //ConvolutionalLayer c2 = new ConvolutionalLayer(8, 4, 8, LEARN_RATE);
+            //ConvolutionalLayer c3 = new ConvolutionalLayer(8, 2, 64, LEARN_RATE);
+            //FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(LAYER_SIZE_HIDDEN, INPUT_DATA_WIDTH, false, LEARN_RATE);
+            //FullyConnectedLayer outputLayer = new FullyConnectedLayer(LAYER_SIZE_OUTPUT, LAYER_SIZE_HIDDEN, false, LEARN_RATE);
+            //Network network = new Network(c1, c2, c3, hiddenLayer, outputLayer);
+            //Number[] trainingNumbers = Utilities.GetImages(10000);
+            //Console.WriteLine(trainingNumbers.Count(n => n.Label == 1.0));
+            //Train(network, trainingNumbers);
+            //Thread.Sleep(1000);
+            //Number[] testNumbers = Utilities.GetImages(10000);
             //Test(network, testNumbers);
         }
 
@@ -58,8 +78,8 @@ namespace FachprojektLibrary
                     {
                         errorCount++;
                         Console.ForegroundColor = ConsoleColor.Red;
-                        errorPercentage = errorCount / (currentNumber + 1);
                     }
+                    errorPercentage = errorCount / (currentNumber + 1);
                     if (currentNumber % 100 == 0)
                     {
                         double errorPercentageLast100 = 0;
@@ -92,8 +112,8 @@ namespace FachprojektLibrary
                 {
                     errorCount++;
                     Console.ForegroundColor = ConsoleColor.Red;
-                    errorPercentage = errorCount / (currentNumber + 1);
                 }
+                errorPercentage = errorCount / (currentNumber + 1);
                 double errorPercentageLast100 = 0;
                 if (currentNumber > 100 && currentNumber < numbers.Length - 100)
                 {
