@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FachprojektLibrary
@@ -24,11 +25,14 @@ namespace FachprojektLibrary
             Network network = new Network(c1, c2, c3, hiddenLayer, outputLayer);
             //Number[] trainingNumbers = Utilities.ReadCsv(@"D:\Dropbox\Informatik TU Dortmund\Fachprojekte\Data Mining\MNIST\mnist_train.csv");
             //Number[] trainingNumbers = Utilities.ReadKaggleCsv(@"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale\Train.csv");
-            Number[] trainingNumbers = Utilities.GetImages(100000);
+            Number[] trainingNumbers = Utilities.GetImages(10000);
             Console.WriteLine(trainingNumbers.Count(n => n.Label == 1.0));
             Train(network, trainingNumbers);
+            Thread.Sleep(1000);
+            Number[] testNumbers = Utilities.GetImages(100000);
+            Test(network, testNumbers);
 
-            string netName = Utilities.GenerateNetworkName(network);
+            //string netName = Utilities.GenerateNetworkName(network);
 
             //Utilities.StoreNetwork(network, $@"C:\Users\Julius Jacobsohn\Documents\Visual Studio 2017\Projects\MNIST_Convolutional\MNIST_Convolutional\resource\{netName}.json");
             //TODO
@@ -83,25 +87,12 @@ namespace FachprojektLibrary
             foreach (var number in numbers)
             {
                 var outputs = network.GetOutputs(number.Data);
-                double biggestIndex = -1;
-                double biggestNumber = 0;
-                for (int i = 0; i < outputs.Length; i++)
-                {
-                    if (outputs[i] > biggestNumber)
-                    {
-                        biggestNumber = outputs[i];
-                        biggestIndex = i;
-                    }
-                }
-                number.Guess = biggestIndex;
-                if (number.Label != number.Guess)
+                number.Guess = outputs[0];
+                if (number.Label != number.LabelGuess)
                 {
                     errorCount++;
-                    if (currentNumber != 0)
-                    {
-                        errorPercentage = errorCount / currentNumber;
-                    }
                     Console.ForegroundColor = ConsoleColor.Red;
+                    errorPercentage = errorCount / (currentNumber + 1);
                 }
                 double errorPercentageLast100 = 0;
                 if (currentNumber > 100 && currentNumber < numbers.Length - 100)
@@ -110,7 +101,11 @@ namespace FachprojektLibrary
                 }
                 if (currentNumber % 100 == 0)
                 {
-                    Console.WriteLine($"[Test:{currentNumber}/{totalNumbers}] Gegeben: {number.Label} Geraten: {biggestIndex} ({biggestNumber}) Fehlerprozentsatz: {Math.Round(errorPercentage * 100)}% Fehlerprozentsatz (letzte 100): {Math.Round(errorPercentageLast100)}%");
+                    if (currentNumber > 100 && currentNumber < numbers.Length - 100)
+                    {
+                        errorPercentageLast100 = numbers.Skip(currentNumber - 100).Take(100).Count(n => n.Label != n.LabelGuess);
+                    }
+                    Console.WriteLine($"[Test:{currentNumber}/{totalNumbers}] Gegeben: {number.Label} Geraten: {number.LabelGuess} ({number.Guess.ToString("n2")}) Fehlerprozentsatz: {Math.Round(errorPercentage * 100)}% Fehlerprozentsatz (letzte 100): {Math.Round(errorPercentageLast100)}%");
                 }
                 Console.ForegroundColor = ConsoleColor.White;
                 currentNumber++;
