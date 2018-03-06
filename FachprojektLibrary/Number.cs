@@ -6,7 +6,7 @@ namespace FachprojektLibrary
     {
         public double Label { get; set; }
         public double Guess { get; set; }
-        public double LabelGuess { get { return Guess > 0.5 ? 1 : 0; } }
+        public double LabelGuess { get; set; }
         public double[] Data { get; set; }
         public double[] NormalizedData
         {

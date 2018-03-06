@@ -22,9 +22,10 @@ namespace ImagePreprocessing
         const string PATH_TRAIN_SMALL_GRAY = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale";
         static void Main(string[] args)
         {
-            var lines = File.ReadAllLines(Path.Combine(PATH_MNIST, "mnist_train.csv"));
+            var lines = File.ReadAllLines(Path.Combine(PATH_MNIST, "mnist_test.csv"));
             Console.WriteLine("Read lines");
-            string allLines = "";
+            StringBuilder allLines = new StringBuilder();
+            int counter = 0;
             foreach(var line in lines)
             {
                 var newLine = line;
@@ -32,12 +33,14 @@ namespace ImagePreprocessing
                 {
                     newLine += ",0";
                 }
-                allLines += newLine + "\n";
+                allLines.AppendLine(newLine);
+                Console.WriteLine(counter);
+                counter++;
             }
             Console.WriteLine("Appended");
-            allLines = allLines.TrimEnd();
+            var result = allLines.ToString().TrimEnd();
             Console.WriteLine("Trimmed");
-            File.AppendAllText(Path.Combine(PATH_MNIST, "mnist_train_appended.csv"),allLines);
+            File.AppendAllText(Path.Combine(PATH_MNIST, "mnist_test_appended.csv"), result);
             Console.WriteLine("Saved");
             ////var lines = File.ReadAllLines(Path.Combine(PATH_TRAIN_SMALL_GRAY, "Train_num.csv"));
             ////var cats = lines.Take(1000).ToArray();
