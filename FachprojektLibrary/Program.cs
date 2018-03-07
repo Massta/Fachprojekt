@@ -29,21 +29,14 @@ namespace FachprojektLibrary
             Network network = new Network(c1, c2, c3, c4, c5, hiddenLayer, outputLayer);
 
             Number[] trainingNumbers = Utilities.ReadCsv(@"C:\Users\Julius Jacobsohn\OneDrive\Dokumente\MNIST\mnist_train_small_appended.csv")
-                .Take(500).ToArray();
-            //var batches = GetBatches(trainingNumbers, (int)BATCH_SIZE);
-            //int bCounter = 0;
-            //foreach(var batch in batches)
-            //{
-            //    Train(network, batch);
-            //    Console.WriteLine("Finished training batch "+bCounter);
-            //    bCounter++;
-            //    Thread.Sleep(500);
-            //}
+                .Take(600).ToArray();
             Train(network, trainingNumbers);
 
+            Console.WriteLine("Finished training. Reached Errorpercentage of "+MAXIMUM_ERROR_PERCENTAGE*100+"%");
+            Console.WriteLine("Starting testing...");
             Thread.Sleep(1000);
 
-            Number[] testNumbers = Utilities.ReadCsv(@"C:\Users\Julius Jacobsohn\OneDrive\Dokumente\MNIST\mnist_train_small_appended.csv");
+            Number[] testNumbers = Utilities.ReadCsv(@"C:\Users\Julius Jacobsohn\OneDrive\Dokumente\MNIST\mnist_test_appended.csv");
             Test(network, testNumbers);
 
             //Small Rectangles
@@ -135,7 +128,7 @@ namespace FachprojektLibrary
                         {
                             errorPercentageLast100 = numbers.Skip(currentNumber - 100).Take(100).Count(n => n.Label != n.LabelGuess);
                         }
-                        Console.WriteLine($"[{epoch}:{currentNumber}/{totalNumbers}] Gegeben: {number.Label} Geraten: {number.LabelGuess} ({number.Guess.ToString("n2")}) Fehlerprozentsatz: {Math.Round(errorPercentage * 100)}% Fehlerprozentsatz (letzte 100): {Math.Round(errorPercentageLast100)}%");
+                        Console.WriteLine($"[{epoch}:{currentNumber}/{totalNumbers}] Gegeben: {number.Label} Geraten: {number.LabelGuess} ({number.Guess.ToString("n2")}) Fehlerprozentsatz: {Math.Round(errorPercentage * 100)}%");
                     }
                     //Console.WriteLine($"[{epoch}:{currentNumber}/{totalNumbers}] Gegeben: {number.Label} Geraten: {number.LabelGuess} ({number.Guess.ToString("n2")}) Fehlerprozentsatz: {Math.Round(errorPercentage * 100)}%");
                     Console.ForegroundColor = ConsoleColor.White;
@@ -145,7 +138,7 @@ namespace FachprojektLibrary
                         topError[i] = labelArray[i] - outputs[i];
                         batchError[i] += topError[i];
                     }
-                    if(currentNumber%BATCH_SIZE == 0)
+                    if (currentNumber % BATCH_SIZE == 0)
                     {
                         network.AdjustWeights(batchError);
                     }
@@ -184,19 +177,7 @@ namespace FachprojektLibrary
                     Console.ForegroundColor = ConsoleColor.Red;
                 }
                 errorPercentage = errorCount / (currentNumber + 1);
-                double errorPercentageLast100 = 0;
-                if (currentNumber > 100 && currentNumber < numbers.Length - 100)
-                {
-                    errorPercentageLast100 = numbers.Skip(currentNumber - 100).Take(100).Count(n => n.Label != n.Guess);
-                }
-                if (currentNumber % 100 == 0)
-                {
-                    if (currentNumber > 100 && currentNumber < numbers.Length - 100)
-                    {
-                        errorPercentageLast100 = numbers.Skip(currentNumber - 100).Take(100).Count(n => n.Label != n.LabelGuess);
-                    }
-                    Console.WriteLine($"[Test:{currentNumber}/{totalNumbers}] Gegeben: {number.Label} Geraten: {number.LabelGuess} ({number.Guess.ToString("n2")}) Fehlerprozentsatz: {Math.Round(errorPercentage * 100)}% Fehlerprozentsatz (letzte 100): {Math.Round(errorPercentageLast100)}%");
-                }
+                Console.WriteLine($"[Test:{currentNumber}/{totalNumbers}] Gegeben: {number.Label} Geraten: {number.LabelGuess} ({number.Guess.ToString("n2")}) Fehlerprozentsatz: {Math.Round(errorPercentage * 100)}%");
                 Console.ForegroundColor = ConsoleColor.White;
                 currentNumber++;
             }

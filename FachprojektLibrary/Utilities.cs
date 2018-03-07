@@ -8,7 +8,7 @@ namespace FachprojektLibrary
 {
     public class Utilities
     {
-        static Random random = new Random();
+        static Random random = new Random(100);
         public static double Sigmoid(double x, double delta = 1)
         {
             return 1.0 / (1.0 + Math.Exp(-delta * x));
