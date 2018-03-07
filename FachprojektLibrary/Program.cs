@@ -9,53 +9,41 @@ namespace FachprojektLibrary
 {
     class Program
     {
-        public const int LAYER_SIZE_HIDDEN = 100;
+        public const int LAYER_SIZE_HIDDEN = 243;
         public const int LAYER_SIZE_OUTPUT = 10;
         public const double LEARN_RATE = 0.01;
         public const double MAXIMUM_ERROR_PERCENTAGE = 0.05;
         public const double BATCH_SIZE = 1;
 
-        public const int INPUT_DATA_WIDTH = 32;
+        public const int INPUT_DATA_WIDTH = 243;
         static void Main(string[] args)
         {
             //Number[] trainingNumbers = Utilities.ReadKaggleCsv(@"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale\Train.csv");
-            ConvolutionalLayer c1 = new ConvolutionalLayer(2, 32, 1, LEARN_RATE);
-            ConvolutionalLayer c2 = new ConvolutionalLayer(2, 16, 2, LEARN_RATE);
-            ConvolutionalLayer c3 = new ConvolutionalLayer(2, 8, 4, LEARN_RATE);
-            ConvolutionalLayer c4 = new ConvolutionalLayer(2, 4, 8, LEARN_RATE);
-            ConvolutionalLayer c5 = new ConvolutionalLayer(2, 2, 16, LEARN_RATE);
+            ConvolutionalLayer c1 = new ConvolutionalLayer(3, 32, 1, LEARN_RATE);
+            ConvolutionalLayer c2 = new ConvolutionalLayer(3, 16, 3, LEARN_RATE);
+            ConvolutionalLayer c3 = new ConvolutionalLayer(3, 8, 9, LEARN_RATE);
+            ConvolutionalLayer c4 = new ConvolutionalLayer(3, 4, 27, LEARN_RATE);
+            ConvolutionalLayer c5 = new ConvolutionalLayer(3, 2, 81, LEARN_RATE);
             FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(LAYER_SIZE_HIDDEN, INPUT_DATA_WIDTH, false, LEARN_RATE);
             FullyConnectedLayer outputLayer = new FullyConnectedLayer(LAYER_SIZE_OUTPUT, LAYER_SIZE_HIDDEN, false, LEARN_RATE);
             Network network = new Network(c1, c2, c3, c4, c5, hiddenLayer, outputLayer);
 
             Number[] trainingNumbers = Utilities.ReadCsv(@"C:\Users\Julius Jacobsohn\OneDrive\Dokumente\MNIST\mnist_train_small_appended.csv")
                 .Take(500).ToArray();
-            //double errorRate = 1;
-            //int epoch = 0;
-            //while(errorRate > MAXIMUM_ERROR_PERCENTAGE)
+            //var batches = GetBatches(trainingNumbers, (int)BATCH_SIZE);
+            //int bCounter = 0;
+            //foreach(var batch in batches)
             //{
-            //    var batches = GetBatches(trainingNumbers
-            //        .OrderBy(b => Guid.NewGuid())
-            //        .ToArray(), (int)BATCH_SIZE);
-            //    int bCounter = 0;
-            //    foreach (var batch in batches)
-            //    {
-            //        Train(network, batch);
-            //        Console.WriteLine($"[{epoch}:{bCounter+1}/{batches.Length}] Finished training batch " + bCounter);
-            //        bCounter++;
-            //        Thread.Sleep(500);
-            //    }
-            //    Console.WriteLine("Testing first batch...");
-            //    errorRate = Test(network, batches[0]);
-            //    Console.WriteLine("New Epoch: "+epoch+" Global error: " + errorRate);
-            //    Thread.Sleep(1000);
-            //    epoch++;
+            //    Train(network, batch);
+            //    Console.WriteLine("Finished training batch "+bCounter);
+            //    bCounter++;
+            //    Thread.Sleep(500);
             //}
             Train(network, trainingNumbers);
 
             Thread.Sleep(1000);
 
-            Number[] testNumbers = Utilities.ReadCsv(@"C:\Users\Julius Jacobsohn\OneDrive\Dokumente\MNIST\mnist_test_appended.csv");
+            Number[] testNumbers = Utilities.ReadCsv(@"C:\Users\Julius Jacobsohn\OneDrive\Dokumente\MNIST\mnist_train_small_appended.csv");
             Test(network, testNumbers);
 
             //Small Rectangles
@@ -89,15 +77,15 @@ namespace FachprojektLibrary
 
         private static Number[][] GetBatches(Number[] trainingNumbers, int batchSize)
         {
-            Number[][] batches = new Number[trainingNumbers.Count()/batchSize][];
-            for(int i = 0; i < batches.Length; i++)
+            Number[][] batches = new Number[trainingNumbers.Count() / batchSize][];
+            for (int i = 0; i < batches.Length; i++)
             {
                 batches[i] = trainingNumbers.Skip(i * batchSize).Take(batchSize).ToArray();
             }
             return batches;
         }
 
-        public static double Train(Network network, Number[] numbers)
+        public static void Train(Network network, Number[] numbers)
         {
             double errorCount = 0;
             double errorPercentage = 1;
@@ -140,14 +128,14 @@ namespace FachprojektLibrary
                         Console.ForegroundColor = ConsoleColor.Red;
                     }
                     errorPercentage = errorCount / (currentNumber);
-                    if (currentNumber % BATCH_SIZE == 0 && currentNumber != 0)
+                    if (currentNumber % 100 == 0)
                     {
                         double errorPercentageLast100 = 0;
-                        if (currentNumber > BATCH_SIZE && currentNumber < numbers.Length - BATCH_SIZE)
+                        if (currentNumber > 100 && currentNumber < numbers.Length - 100)
                         {
-                            errorPercentageLast100 = numbers.Skip(currentNumber -((int) BATCH_SIZE)).Take((int)BATCH_SIZE).Count(n => n.Label != n.LabelGuess);
+                            errorPercentageLast100 = numbers.Skip(currentNumber - 100).Take(100).Count(n => n.Label != n.LabelGuess);
                         }
-                        Console.WriteLine($"[{epoch}:{currentNumber}/{totalNumbers}] Gegeben: {number.Label} Geraten: {number.LabelGuess} ({number.Guess.ToString("n2")}) Fehlerprozentsatz: {Math.Round(errorPercentage * 100)}% Fehlerprozentsatz (letzte {BATCH_SIZE}): {Math.Round(errorPercentageLast100)}%");
+                        Console.WriteLine($"[{epoch}:{currentNumber}/{totalNumbers}] Gegeben: {number.Label} Geraten: {number.LabelGuess} ({number.Guess.ToString("n2")}) Fehlerprozentsatz: {Math.Round(errorPercentage * 100)}% Fehlerprozentsatz (letzte 100): {Math.Round(errorPercentageLast100)}%");
                     }
                     //Console.WriteLine($"[{epoch}:{currentNumber}/{totalNumbers}] Gegeben: {number.Label} Geraten: {number.LabelGuess} ({number.Guess.ToString("n2")}) Fehlerprozentsatz: {Math.Round(errorPercentage * 100)}%");
                     Console.ForegroundColor = ConsoleColor.White;
@@ -167,11 +155,9 @@ namespace FachprojektLibrary
                 errorCount = 0;
                 epoch++;
             }
-
-            return errorPercentage;
         }
 
-        public static double Test(Network network, Number[] numbers)
+        public static void Test(Network network, Number[] numbers)
         {
             double errorCount = 0;
             double errorPercentage = 1;
@@ -214,7 +200,6 @@ namespace FachprojektLibrary
                 Console.ForegroundColor = ConsoleColor.White;
                 currentNumber++;
             }
-            return errorPercentage;
         }
     }
 }
