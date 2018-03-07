@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackPropagationXor", "BackPropagationXor\BackPropagationXor.csproj", "{855BC27A-A488-4423-8A29-AA9D893ABCFA}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HardcodedNetwork", "HardcodedNetwork\HardcodedNetwork.csproj", "{1B376BA0-C36A-4391-8A6E-0F0EF4F4980E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestNetwork", "TestNetwork\TestNetwork.csproj", "{E7EB6284-CDF7-4C4C-9BD9-6F8E6B0C1862}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MNISTConvolutional", "MNISTConvolutional\MNISTConvolutional.csproj", "{3BA10F63-05EA-4692-B2EB-7C907F406D09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -163,6 +165,18 @@ Global
 		{E7EB6284-CDF7-4C4C-9BD9-6F8E6B0C1862}.Release|x64.Build.0 = Release|Any CPU
 		{E7EB6284-CDF7-4C4C-9BD9-6F8E6B0C1862}.Release|x86.ActiveCfg = Release|Any CPU
 		{E7EB6284-CDF7-4C4C-9BD9-6F8E6B0C1862}.Release|x86.Build.0 = Release|Any CPU
+		{3BA10F63-05EA-4692-B2EB-7C907F406D09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BA10F63-05EA-4692-B2EB-7C907F406D09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BA10F63-05EA-4692-B2EB-7C907F406D09}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3BA10F63-05EA-4692-B2EB-7C907F406D09}.Debug|x64.Build.0 = Debug|Any CPU
+		{3BA10F63-05EA-4692-B2EB-7C907F406D09}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3BA10F63-05EA-4692-B2EB-7C907F406D09}.Debug|x86.Build.0 = Debug|Any CPU
+		{3BA10F63-05EA-4692-B2EB-7C907F406D09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BA10F63-05EA-4692-B2EB-7C907F406D09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BA10F63-05EA-4692-B2EB-7C907F406D09}.Release|x64.ActiveCfg = Release|Any CPU
+		{3BA10F63-05EA-4692-B2EB-7C907F406D09}.Release|x64.Build.0 = Release|Any CPU
+		{3BA10F63-05EA-4692-B2EB-7C907F406D09}.Release|x86.ActiveCfg = Release|Any CPU
+		{3BA10F63-05EA-4692-B2EB-7C907F406D09}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

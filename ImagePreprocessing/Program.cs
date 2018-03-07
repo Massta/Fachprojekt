@@ -22,25 +22,49 @@ namespace ImagePreprocessing
         const string PATH_TRAIN_SMALL_GRAY = @"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale";
         static void Main(string[] args)
         {
-            var lines = File.ReadAllLines(Path.Combine(PATH_MNIST, "mnist_test.csv"));
+            var lines = File.ReadAllLines(Path.Combine(PATH_MNIST, "mnist_train.csv"));
             Console.WriteLine("Read lines");
             StringBuilder allLines = new StringBuilder();
             int counter = 0;
-            foreach(var line in lines)
+            foreach (var line in lines)
             {
-                var newLine = line;
-                for(int i = 0; i < 240; i++)
+                var numbers = line.Split(',');
+                var label = numbers[0];
+                numbers = numbers.Skip(1).ToArray();
+                allLines.Append(label);
+                for (int i = 0; i < numbers.Count(); i++)
                 {
-                    newLine += ",0";
+                    allLines.Append("," + numbers[i]);
+                    if (i % 28 == 0)
+                    {
+                        allLines.Append(",0,0,0,0");
+                    }
                 }
-                allLines.AppendLine(newLine);
-                Console.WriteLine(counter);
+                for (int j = 0; j < 128; j++)
+                {
+                    allLines.Append(",0");
+                }
+                allLines.Append("\n");
+                //var newLine = line;
+
+                ////for(int i = 0; i < 240; i++)
+                ////{
+                ////    newLine += ",0";
+                ////}
+                //allLines.AppendLine(newLine);
+                //Console.WriteLine(counter);
                 counter++;
             }
             Console.WriteLine("Appended");
             var result = allLines.ToString().TrimEnd();
+            for (int i = 0; i < 0; i++)
+            {
+                var line = result.Split('\n');
+                var lineData = line[i].Split(',');
+                PrintImage(lineData.Skip(1).Select(l => int.Parse(l)).ToArray(), 32, Path.Combine(PATH_MNIST, "Images", "image_" + i + ".bmp"));
+            }
             Console.WriteLine("Trimmed");
-            File.AppendAllText(Path.Combine(PATH_MNIST, "mnist_test_appended.csv"), result);
+            File.AppendAllText(Path.Combine(PATH_MNIST, "mnist_train_appended.csv"), result);
             Console.WriteLine("Saved");
             ////var lines = File.ReadAllLines(Path.Combine(PATH_TRAIN_SMALL_GRAY, "Train_num.csv"));
             ////var cats = lines.Take(1000).ToArray();
@@ -100,6 +124,21 @@ namespace ImagePreprocessing
             //    i++;
             //}
             //File.WriteAllText(csvPath, csvText.ToString());
+        }
+
+        public static void PrintImage(int[] data, int width, string path)
+        {
+            Bitmap b = new Bitmap(width, width);
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    var grayScale = data[j * width + i];
+                    Color nc = Color.FromArgb(255, grayScale, grayScale, grayScale);
+                    b.SetPixel(i, j, nc);
+                }
+            }
+            b.Save(path);
         }
 
         public static Bitmap ResizeImage(System.Drawing.Image image, int width, int height)

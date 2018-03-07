@@ -11,7 +11,7 @@ namespace FachprojektLibrary
     {
         public const int LAYER_SIZE_HIDDEN = 243;
         public const int LAYER_SIZE_OUTPUT = 10;
-        public const double LEARN_RATE = 0.001;
+        public const double LEARN_RATE = 0.0001;
         public const double MAXIMUM_ERROR_PERCENTAGE = 0.05;
         public const double BATCH_SIZE = 100;
 
@@ -28,15 +28,27 @@ namespace FachprojektLibrary
             FullyConnectedLayer outputLayer = new FullyConnectedLayer(LAYER_SIZE_OUTPUT, LAYER_SIZE_HIDDEN, false, LEARN_RATE);
             Network network = new Network(c1, c2, c3, c4, c5, hiddenLayer, outputLayer);
 
-            Number[] trainingNumbers = Utilities.ReadCsv(@"C:\Users\Julius Jacobsohn\OneDrive\Dokumente\MNIST\mnist_train_small_appended.csv");
-            //var batches = GetBatches(trainingNumbers, (int)BATCH_SIZE);
-            //int bCounter = 0;
-            //foreach(var batch in batches)
+            Number[] trainingNumbers = Utilities.ReadCsv(@"C:\Users\Julius Jacobsohn\OneDrive\Dokumente\MNIST\mnist_train_appended.csv");
+            //double errorRate = 1;
+            //int epoch = 0;
+            //while(errorRate > MAXIMUM_ERROR_PERCENTAGE)
             //{
-            //    Train(network, batch);
-            //    Console.WriteLine("Finished training batch "+bCounter);
-            //    bCounter++;
-            //    Thread.Sleep(500);
+            //    var batches = GetBatches(trainingNumbers
+            //        .OrderBy(b => Guid.NewGuid())
+            //        .ToArray(), (int)BATCH_SIZE);
+            //    int bCounter = 0;
+            //    foreach (var batch in batches)
+            //    {
+            //        Train(network, batch);
+            //        Console.WriteLine($"[{epoch}:{bCounter+1}/{batches.Length}] Finished training batch " + bCounter);
+            //        bCounter++;
+            //        Thread.Sleep(500);
+            //    }
+            //    Console.WriteLine("Testing first batch...");
+            //    errorRate = Test(network, batches[0]);
+            //    Console.WriteLine("New Epoch: "+epoch+" Global error: " + errorRate);
+            //    Thread.Sleep(1000);
+            //    epoch++;
             //}
             Train(network, trainingNumbers);
 
@@ -84,7 +96,7 @@ namespace FachprojektLibrary
             return batches;
         }
 
-        public static void Train(Network network, Number[] numbers)
+        public static double Train(Network network, Number[] numbers)
         {
             double errorCount = 0;
             double errorPercentage = 1;
@@ -144,16 +156,18 @@ namespace FachprojektLibrary
                         topError[i] = labelArray[i] - outputs[i];
                         batchError[i] += topError[i];
                     }
-                    network.AdjustWeights(batchError);
+                    network.AdjustWeights(topError);
                     batchError = new double[LAYER_SIZE_OUTPUT];
                     currentNumber++;
                 }
                 errorCount = 0;
                 epoch++;
             }
+
+            return errorPercentage;
         }
 
-        public static void Test(Network network, Number[] numbers)
+        public static double Test(Network network, Number[] numbers)
         {
             double errorCount = 0;
             double errorPercentage = 1;
@@ -162,7 +176,18 @@ namespace FachprojektLibrary
             foreach (var number in numbers)
             {
                 var outputs = network.GetOutputs(number.Data);
-                number.Guess = outputs[0];
+                int biggestIndex = -1;
+                double biggestNumber = -1;
+                for (int i = 0; i < outputs.Length; i++)
+                {
+                    if (outputs[i] > biggestNumber)
+                    {
+                        biggestNumber = outputs[i];
+                        biggestIndex = i;
+                    }
+                }
+                number.Guess = outputs[biggestIndex];
+                number.LabelGuess = biggestIndex;
                 if (number.Label != number.LabelGuess)
                 {
                     errorCount++;
@@ -185,6 +210,7 @@ namespace FachprojektLibrary
                 Console.ForegroundColor = ConsoleColor.White;
                 currentNumber++;
             }
+            return errorPercentage;
         }
     }
 }
