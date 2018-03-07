@@ -33,7 +33,7 @@ namespace FachprojektLibrary
         /// <param name="learnRate"></param>
         public ConvolutionalLayer(int filterAmount, int inputSize, int imageAmount, double learnRate = 0.01)
         {
-            LearnRate = learnRate;
+            LearnRate = LearnRate;
             NeuronSize = FILTER_SIZE;
             FilterStride = FILTER_SIZE;
             InputSize = inputSize;
@@ -89,7 +89,7 @@ namespace FachprojektLibrary
                 {
                     for (int j = 0; j < FILTER_SIZE; j++)
                     {
-                        Filters[filter].Weights[i, j] += LearnRate * FilterDeltas[filter][i][j];
+                        Filters[filter].Weights[i, j] -= LearnRate * FilterDeltas[filter][i][j];
                     }
                 }
             }
@@ -149,7 +149,7 @@ namespace FachprojektLibrary
                 {
                     for (int j = 0; j < FILTER_SIZE; j++)
                     {
-                        Filters[filter].Weights[i, j] += LearnRate * dw[filter][i][j];
+                        Filters[filter].Weights[i, j] -= LearnRate * dw[filter][i][j];
                     }
                 }
             }

@@ -104,20 +104,20 @@ namespace MNISTConvolutional
 
         public override void Activate()
         {
-            for(int filter = 0; filter < Filters.Length; filter++)
+            for (int filter = 0; filter < Filters.Length; filter++)
             {
                 Tensor currentFilter = Filters[filter];
                 for (int x = 0; x < Out.Size.X; x++)
                 {
                     for (int y = 0; y < Out.Size.Y; y++)
                     {
-                        TdSize mapped = MapToInput(new TdSize {X = x, Y = y, Z = 0 }, 0);
+                        TdSize mapped = MapToInput(new TdSize { X = x, Y = y, Z = 0 }, 0);
                         float sum = 0;
                         for (int i = 0; i < ExtendFilter; i++)
                         {
                             for (int j = 0; j < ExtendFilter; j++)
                             {
-                                for(int z = 0; z < In.Size.Z; z++)
+                                for (int z = 0; z < In.Size.Z; z++)
                                 {
                                     float f = currentFilter.Get(i, j, z);
                                     float v = In.Get(mapped.X + i, mapped.Y + j, z);
@@ -133,13 +133,13 @@ namespace MNISTConvolutional
 
         public override void FixWeights()
         {
-            for(int a = 0; a < Filters.Length; a++)
+            for (int a = 0; a < Filters.Length; a++)
             {
-                for(int i = 0; i < ExtendFilter; i++)
+                for (int i = 0; i < ExtendFilter; i++)
                 {
                     for (int j = 0; j < ExtendFilter; j++)
                     {
-                        for(int z = 0; z < In.Size.Z; z++)
+                        for (int z = 0; z < In.Size.Z; z++)
                         {
                             float w = Filters[a].Get(i, j, z);
                             float gradient = Gradients[a].Get(i, j, z);
@@ -155,13 +155,13 @@ namespace MNISTConvolutional
 
         public override void CalculateGradients(Tensor nextLayerGradients)
         {
-            for(int k = 0; k < Gradients.Length; k++)
+            for (int k = 0; k < Gradients.Length; k++)
             {
-                for(int i = 0; i < ExtendFilter; i++)
+                for (int i = 0; i < ExtendFilter; i++)
                 {
                     for (int j = 0; j < ExtendFilter; j++)
                     {
-                        for(int z = 0; z < In.Size.Z; z++)
+                        for (int z = 0; z < In.Size.Z; z++)
                         {
                             Gradients[k].Set(i, j, z, 0);
                         }
@@ -169,7 +169,7 @@ namespace MNISTConvolutional
                 }
             }
 
-            for(int x = 0; x < In.Size.X; x++)
+            for (int x = 0; x < In.Size.X; x++)
             {
                 for (int y = 0; y < In.Size.Y; y++)
                 {
@@ -177,7 +177,7 @@ namespace MNISTConvolutional
                     for (int z = 0; z < In.Size.Z; z++)
                     {
                         float sumError = 0;
-                        for(int i = range.MinX; i <= range.MaxX; i++)
+                        for (int i = range.MinX; i <= range.MaxX; i++)
                         {
                             int minX = i * Stride;
                             for (int j = range.MinY; j <= range.MaxY; j++)
@@ -185,10 +185,10 @@ namespace MNISTConvolutional
                                 int minY = j * Stride;
                                 for (int k = range.MinZ; k <= range.MaxZ; k++)
                                 {
-                                    int wApplied = (int)Filters[k].Get(x - minX, y - minY, z);
+                                    int wApplied = (int)Filters[k].Get(x - minX, y - minY, z); //TODO eigentlich int
                                     sumError += wApplied * nextLayerGradients.Get(i, j, k);
                                     var oldValue = Gradients[k].Get(x - minX, y - minY, z);
-                                    Gradients[k].Set(x - minX, y - minY, z, oldValue+In.Get(x, y, z));
+                                    Gradients[k].Set(x - minX, y - minY, z, oldValue + In.Get(x, y, z) * nextLayerGradients.Get(i, j, k));
                                 }
                             }
                         }

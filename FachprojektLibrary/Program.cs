@@ -9,26 +9,27 @@ namespace FachprojektLibrary
 {
     class Program
     {
-        public const int LAYER_SIZE_HIDDEN = 243;
+        public const int LAYER_SIZE_HIDDEN = 100;
         public const int LAYER_SIZE_OUTPUT = 10;
-        public const double LEARN_RATE = 0.0001;
+        public const double LEARN_RATE = 0.01;
         public const double MAXIMUM_ERROR_PERCENTAGE = 0.05;
-        public const double BATCH_SIZE = 100;
+        public const double BATCH_SIZE = 1;
 
-        public const int INPUT_DATA_WIDTH = 243;
+        public const int INPUT_DATA_WIDTH = 32;
         static void Main(string[] args)
         {
             //Number[] trainingNumbers = Utilities.ReadKaggleCsv(@"C:\Users\Julius Jacobsohn\Documents\Kaggle\Train_Small_Grayscale\Train.csv");
-            ConvolutionalLayer c1 = new ConvolutionalLayer(3, 32, 1, LEARN_RATE);
-            ConvolutionalLayer c2 = new ConvolutionalLayer(3, 16, 3, LEARN_RATE);
-            ConvolutionalLayer c3 = new ConvolutionalLayer(3, 8, 9, LEARN_RATE);
-            ConvolutionalLayer c4 = new ConvolutionalLayer(3, 4, 27, LEARN_RATE);
-            ConvolutionalLayer c5 = new ConvolutionalLayer(3, 2, 81, LEARN_RATE);
+            ConvolutionalLayer c1 = new ConvolutionalLayer(2, 32, 1, LEARN_RATE);
+            ConvolutionalLayer c2 = new ConvolutionalLayer(2, 16, 2, LEARN_RATE);
+            ConvolutionalLayer c3 = new ConvolutionalLayer(2, 8, 4, LEARN_RATE);
+            ConvolutionalLayer c4 = new ConvolutionalLayer(2, 4, 8, LEARN_RATE);
+            ConvolutionalLayer c5 = new ConvolutionalLayer(2, 2, 16, LEARN_RATE);
             FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(LAYER_SIZE_HIDDEN, INPUT_DATA_WIDTH, false, LEARN_RATE);
             FullyConnectedLayer outputLayer = new FullyConnectedLayer(LAYER_SIZE_OUTPUT, LAYER_SIZE_HIDDEN, false, LEARN_RATE);
             Network network = new Network(c1, c2, c3, c4, c5, hiddenLayer, outputLayer);
 
-            Number[] trainingNumbers = Utilities.ReadCsv(@"C:\Users\Julius Jacobsohn\OneDrive\Dokumente\MNIST\mnist_train_appended.csv");
+            Number[] trainingNumbers = Utilities.ReadCsv(@"C:\Users\Julius Jacobsohn\OneDrive\Dokumente\MNIST\mnist_train_small_appended.csv")
+                .Take(500).ToArray();
             //double errorRate = 1;
             //int epoch = 0;
             //while(errorRate > MAXIMUM_ERROR_PERCENTAGE)
@@ -156,7 +157,10 @@ namespace FachprojektLibrary
                         topError[i] = labelArray[i] - outputs[i];
                         batchError[i] += topError[i];
                     }
-                    network.AdjustWeights(topError);
+                    if(currentNumber%BATCH_SIZE == 0)
+                    {
+                        network.AdjustWeights(batchError);
+                    }
                     batchError = new double[LAYER_SIZE_OUTPUT];
                     currentNumber++;
                 }

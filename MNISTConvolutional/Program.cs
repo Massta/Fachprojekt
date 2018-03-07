@@ -65,6 +65,14 @@ namespace MNISTConvolutional
                     biggestIndex = i;
                 }
             }
+            if(label == biggestIndex)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
             Console.WriteLine($"Gegeben: {label}, Geraten: {biggestIndex} ({guess.ToString("n2")})");
 
             Tensor topGradients = layers.Last().Out.Substract(expected);
